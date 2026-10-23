@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "name": "project-delphi-rubric",
+  "description": "Weighted 0-100 evaluation rubric scored independently by two cross-provider frontier models.",
+  "dimensions": [
+    {
+      "id": "model-fidelity",
+      "weight": 20,
+      "question": "Does the code implement the exact mathematical equation as stated in the paper?"
+    },
+    {
+      "id": "empirical-match",
+      "weight": 25,
+      "question": "Does the fitted curve match the full empirical domain (not just a cherry-picked subset)?"
+    },
+    {
+      "id": "parameter-expressivity",
+      "weight": 10,
+      "question": "Are the fitted parameters physically interpretable and tested on synthetic recovery?"
+    },
+    {
+      "id": "quantitative-validation",
+      "weight": 15,
+      "question": "Are residuals (RMSE, R^2) reported and verified by the independent sidecar?"
+    },
+    {
+      "id": "data-traceability",
+      "weight": 10,
+      "question": "Is the empirical dataset pinned by SHA-256 and verified before execution?"
+    },
+    {
+      "id": "code-traceability",
+      "weight": 8,
+      "question": "Do code comments map variables directly to the Lean 4 law and paper equation?"
+    },
+    {
+      "id": "reproducibility",
+      "weight": 12,
+      "question": "Is the script deterministic with a passing self-test?"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "pass": 1,
+  "target_script": "example/pass1_naive_fit.py",
+  "artifact_file": "example/pass1_metrics.json",
+  "artifact_sha256": "26455f9f9c24c80bde0d7d8dceabd2a759ece2c070624b42ecb340744b866362",
+  "independent_measurements": {
+    "n_specimens_total": 12,
+    "rmse_all_g": 44.2323,
+    "r2_all": -0.246106,
+    "mae_head_subset_g": 0.0945,
+    "mae_body_subset_g": 51.7015,
+    "sidecar_builder_rmse_delta": 3.6e-05
+  }
+}

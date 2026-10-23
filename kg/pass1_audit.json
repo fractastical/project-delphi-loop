@@ -1,0 +1,20 @@
+{
+  "pass": 1,
+  "assessor_model": "gemini-4-argon",
+  "provider": "Google DeepMind",
+  "blinded": true,
+  "target_script": "example/pass1_naive_fit.py",
+  "scores": {
+    "model-fidelity": 35,
+    "empirical-match": 20,
+    "parameter-expressivity": 40,
+    "quantitative-validation": 50,
+    "data-traceability": 95,
+    "code-traceability": 70,
+    "reproducibility": 90
+  },
+  "remediation": [
+    "remediation needed: Fit the power law y = a * x^b across the full organism (all 12 rows of example/data.csv, accounting for both head and body modules) instead of fitting a linear line only to the 6 head rows (line 49).",
+    "remediation needed: Report the fitted power-law exponents b_head and b_body and verify that full-dataset R^2 exceeds 0.99."
+  ]
+}

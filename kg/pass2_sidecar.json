@@ -1,0 +1,14 @@
+{
+  "pass": 2,
+  "target_script": "example/pass2_remediated_fit.py",
+  "artifact_file": "example/pass2_metrics.json",
+  "artifact_sha256": "ddb638b2e99b344a39355587d19878114f16e7ddfe5656c2a999bab84134ffa1",
+  "independent_measurements": {
+    "n_specimens_total": 12,
+    "rmse_all_g": 0.0227,
+    "r2_all": 1.0,
+    "mae_head_subset_g": 0.0051,
+    "mae_body_subset_g": 0.0286,
+    "sidecar_builder_rmse_delta": 2e-05
+  }
+}

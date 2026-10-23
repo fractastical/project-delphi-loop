@@ -1,0 +1,25 @@
+{
+  "pass": 1,
+  "script": "example/pass1_naive_fit.py",
+  "model_equation": "y = m * x + c (fitted to head subset only)",
+  "fitted_params": {
+    "m": 0.303857,
+    "c": -2.159524
+  },
+  "predictions": [
+    0.879,
+    1.4868,
+    2.0945,
+    2.7022,
+    3.3099,
+    3.9176,
+    5.4369,
+    6.9562,
+    8.4755,
+    9.9948,
+    11.514,
+    13.0333
+  ],
+  "reported_rmse_all": 44.2323,
+  "reported_r2_all": -0.2461
+}

@@ -1,0 +1,35 @@
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix pk: <https://w3id.org/delphi/ontology/> .
+@prefix pkr: <https://w3id.org/delphi/resource/> .
+@prefix sub: <https://w3id.org/delphi/np/pass2-example-claim/> .
+
+sub:Head {
+  <https://w3id.org/delphi/np/pass2-example-claim> a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  pkr:claim-example-allometry a pk:Claim ;
+    pk:targetScript "example/pass2_remediated_fit.py" ;
+    pk:artifactSha256 "ddb638b2e99b344a39355587d19878114f16e7ddfe5656c2a999bab84134ffa1" ;
+    pk:measuredR2 "1.0"^^xsd:double ;
+    pk:measuredRMSE "0.0227"^^xsd:double ;
+    pk:assessedBy pkr:model-gemini-4-argon ;
+    pk:hasScore "0.9471"^^xsd:double ;
+    pk:verdict "faithful" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo pkr:model-gemini-4-argon ;
+    prov:wasDerivedFrom <file://example/pass2_metrics.json> .
+}
+
+sub:pubinfo {
+  npx:supersedes <https://w3id.org/delphi/np/pass1-example-claim> ;
+  <https://w3id.org/delphi/np/pass2-example-claim> npx:hasTrustyDigest "6bae1985e4ea60576d5acc437d7eb612" .
+}

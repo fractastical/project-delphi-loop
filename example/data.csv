@@ -1,0 +1,13 @@
+specimen_id,region,length_mm,mass_g
+sp_01,head,10.0,1.02
+sp_02,head,12.0,1.46
+sp_03,head,14.0,1.98
+sp_04,head,16.0,2.59
+sp_05,head,18.0,3.28
+sp_06,head,20.0,4.06
+sp_07,body,25.0,15.60
+sp_08,body,30.0,27.05
+sp_09,body,35.0,42.85
+sp_10,body,40.0,64.02
+sp_11,body,45.0,91.10
+sp_12,body,50.0,125.00

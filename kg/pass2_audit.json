@@ -1,0 +1,18 @@
+{
+  "pass": 2,
+  "supersedes": "kg/pass1_audit.json",
+  "assessor_model": "gemini-4-argon",
+  "provider": "Google DeepMind",
+  "blinded": true,
+  "target_script": "example/pass2_remediated_fit.py",
+  "scores": {
+    "model-fidelity": 95,
+    "empirical-match": 96,
+    "parameter-expressivity": 92,
+    "quantitative-validation": 95,
+    "data-traceability": 95,
+    "code-traceability": 92,
+    "reproducibility": 95
+  },
+  "remediation": []
+}

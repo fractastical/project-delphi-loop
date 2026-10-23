@@ -1,0 +1,28 @@
+{
+  "pass": 2,
+  "supersedes_pass": 1,
+  "script": "example/pass2_remediated_fit.py",
+  "model_equation": "y = a_region * x ^ b_region (two-module power law across all 12 rows)",
+  "fitted_params": {
+    "a_head": 0.010326,
+    "b_head": 1.9932,
+    "a_body": 0.000997,
+    "b_body": 3.0007
+  },
+  "predictions": [
+    1.0165,
+    1.4619,
+    1.9877,
+    2.5938,
+    3.2802,
+    4.0467,
+    15.62,
+    26.9949,
+    42.8716,
+    64.001,
+    91.1341,
+    125.0219
+  ],
+  "reported_rmse_all": 0.0227,
+  "reported_r2_all": 1.0
+}
