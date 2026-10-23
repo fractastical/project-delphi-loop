@@ -1,10 +1,10 @@
-# Project Delphi — Closed-Loop Frontier Model Orchestration, Prompts & Gates
+# Project Delphi — Closed-Loop Frontier Model Orchestration, Prompts, Gates & Knowledge Graph
 
 > **Clean, zero-dependency reference repository** showing how Project Delphi integrates frontier models (`claude-fable-5-1`, `gemini-4-argon`, `gpt-5.6-sol`) in a closed loop with **deterministic verification gates**, **blinded cross-provider refereeing**, and **RDF Nanopublication (`pk:evidenceAgainst`) feedback**.
 
 ![Project Delphi 12-Step Closed-Loop Architecture](./media/delphi_12step_closed_loop.gif)
 
-*12-Step Closed-Loop Architecture ([animated GIF](./media/delphi_12step_closed_loop.gif) · [high-res dark PNG](./media/delphi_12step_closed_loop.png) · [15-paper corpus overview GIF](./media/morphoeval_pipeline.gif)). Every frontier LLM step is bracketed by a deterministic gate (`gates/1_verify_inputs.py`, `gates/2_measure_sidecar.py`, `gates/3_compile_and_query_kg.py`). In Step 7, two models from different companies score the work in isolated worktrees; Step 9 compiles any defects into `pk:evidenceAgainst` RDF triples; and Step 12 feeds those triples back into Step 5 (`prompts/03_remediation_prompt.md`).*
+*12-Step Closed-Loop Architecture ([animated GIF](./media/delphi_12step_closed_loop.gif) · [high-res dark PNG](./media/delphi_12step_closed_loop.png) · [RDF Knowledge Graph map](./media/delphi_knowledge_graph_network.png) · [interactive HTML KG Explorer](./kg/explore_kg.html)). Every frontier LLM step is bracketed by a deterministic gate (`gates/1_verify_inputs.py`, `gates/2_measure_sidecar.py`, `gates/3_compile_and_query_kg.py`). In Step 7, two models from different companies score the work in isolated worktrees; Step 9 compiles any defects into `pk:evidenceAgainst` RDF triples; and Step 12 feeds those triples back into Step 5 (`prompts/03_remediation_prompt.md`).*
 
 ---
 
@@ -18,7 +18,21 @@ python3 run_loop.py
 
 ---
 
-## 1. Full 12-Step Closed-Loop Architecture (Two Views)
+## 1. Visualizing the Knowledge Graph Itself & Its Exact Contents (`kg/*.trig`)
+
+![Project Delphi RDF Knowledge Graph Topology & Nanopublication Contents](./media/delphi_knowledge_graph_network.png)
+
+Every checkpoint emitted by Gate 3 (`gates/3_compile_and_query_kg.py`) is a self-contained **RDF Nanopublication** (`.trig`) composed of **4 named RDF graphs**:
+1. **`sub:Head`**: Links the Nanopublication URI to its assertion, provenance, and publication info graphs.
+2. **`sub:assertion`**: Stores the `pk:Claim`, the target script path, the SHA-256 hash of the verified output (`pk:artifactSha256`), the independent sidecar metrics (`pk:measuredR2`, `pk:measuredRMSE`), the referee's weighted score (`pk:hasScore`), and—whenever a dimension scores $<80$—the explicit **`pk:evidenceAgainst` remediation triples** that trigger Pass 2.
+3. **`sub:provenance`**: Pins which frontier model (`prov:wasAttributedTo`) and which deterministic sidecar file (`prov:wasDerivedFrom`) produced the assessment.
+4. **`sub:pubinfo`**: Records the trusty digest (`npx:hasTrustyDigest`) and, in Pass 2, the **`npx:supersedes` link** pointing back to the Pass 1 Nanopub so the entire audit history remains immutable and queryable.
+
+> **Interactive Knowledge Graph Explorer:** Open [`kg/explore_kg.html`](./kg/explore_kg.html) in any browser to click every RDF node (`np:Nanopublication`, `pk:Claim`, `pk:evidenceAgainst`, `sub:provenance`) and inspect its exact `.trig` triples and sidecar JSON payloads side-by-side.
+
+---
+
+## 2. Full 12-Step Closed-Loop Architecture (Two Views)
 
 ### View A — Single-Cycle Dark-Mode Architecture (Prompts, Gates & `pk:evidenceAgainst` Feedback)
 ![Single-Cycle 12-Step Closed-Loop Architecture](./media/delphi_12step_closed_loop.png)
@@ -28,7 +42,7 @@ python3 run_loop.py
 
 ---
 
-## 2. Exactly What Is Passed Between Every Component in the System
+## 3. Exactly What Is Passed Between Every Component in the System
 
 | Edge | Producer Component | Consumer Component | Exact File / Payload Passed | Exact Schema & Fields | Deterministic Verification Gate |
 | :-: | :--- | :--- | :--- | :--- | :--- |
@@ -41,43 +55,46 @@ python3 run_loop.py
 
 ---
 
-## 3. Repository File Map
+## 4. Repository File Map
 
 ```text
 project-delphi-loop/
-├── README.md                        # Full closed-loop diagrams, 6-edge contract table & prompts
-├── run_loop.py                      # Single-command runner executing all 7 stages (Pass 1 -> Pass 2)
-├── rubric.json                      # 7 weighted evaluation dimensions (weights sum to 100)
+├── README.md                              # Full closed-loop diagrams, KG topology, contracts & prompts
+├── run_loop.py                            # Single-command runner executing all stages (Pass 1 -> Pass 2)
+├── rubric.json                            # 7 weighted evaluation dimensions (weights sum to 100)
 ├── media/
-│   ├── delphi_12step_closed_loop.gif # Animated 12-step closed-loop architecture (Pass 1 -> Pass 2)
-│   ├── delphi_12step_closed_loop.png # High-res dark-mode 12-step closed-loop diagram
-│   ├── morphoeval_pipeline.gif       # Animated 15-paper corpus pipeline diagram
-│   └── morphoeval_pipeline.png       # Static 15-paper corpus pipeline diagram
+│   ├── delphi_12step_closed_loop.gif       # Animated 12-step closed-loop architecture (Pass 1 -> Pass 2)
+│   ├── delphi_12step_closed_loop.png       # High-res dark-mode 12-step closed-loop diagram
+│   ├── delphi_knowledge_graph_network.png  # Visual map of the RDF Knowledge Graph & Nanopub contents
+│   ├── morphoeval_pipeline.gif             # Animated 15-paper corpus pipeline diagram
+│   └── morphoeval_pipeline.png             # Static 15-paper corpus pipeline diagram
 ├── prompts/
-│   ├── 01_builder_prompt.md         # Verbatim prompt + input/output contract for Builder Agent
-│   ├── 02_referee_prompt.md         # Verbatim prompt + worktree blinding rules for Referee Agent
-│   └── 03_remediation_prompt.md     # Verbatim prompt injecting KG `pk:evidenceAgainst` into Pass 2
+│   ├── 01_builder_prompt.md               # Verbatim prompt + input/output contract for Builder Agent
+│   ├── 02_referee_prompt.md               # Verbatim prompt + worktree blinding rules for Referee Agent
+│   └── 03_remediation_prompt.md           # Verbatim prompt injecting KG `pk:evidenceAgainst` into Pass 2
 ├── gates/
-│   ├── 1_verify_inputs.py           # Gate 1: SHA-256 data check + Lean 4 (`0 sorry`) kernel check
-│   ├── 2_measure_sidecar.py         # Gate 2: Zero-LLM sidecar re-computing RMSE, R^2, Head/Body MAE
-│   └── 3_compile_and_query_kg.py    # Gate 3: Emits RDF Nanopub `.trig` & queries `pk:evidenceAgainst`
+│   ├── 1_verify_inputs.py                 # Gate 1: SHA-256 data check + Lean 4 (`0 sorry`) kernel check
+│   ├── 2_measure_sidecar.py               # Gate 2: Zero-LLM sidecar re-computing RMSE, R^2, Head/Body MAE
+│   ├── 3_compile_and_query_kg.py          # Gate 3: Emits RDF Nanopub `.trig` & queries `pk:evidenceAgainst`
+│   └── 4_visualize_kg.py                  # Renders the Knowledge Graph PNG & interactive HTML explorer
 ├── example/
-│   ├── data.csv                     # 12-row dataset (6 `head` rows + 6 `body` rows, SHA-256 pinned)
-│   ├── law.lean                     # 18-line Lean 4 proof checked by Gate 1 (`0 sorry`)
-│   ├── pass1_naive_fit.py           # Pass 1 Builder output (fits only `head` rows -> R^2 = -0.25)
-│   └── pass2_remediated_fit.py      # Pass 2 Builder output (fixes `pk:evidenceAgainst` -> R^2 = 1.00)
+│   ├── data.csv                           # 12-row dataset (6 `head` rows + 6 `body` rows, SHA-256 pinned)
+│   ├── law.lean                           # 18-line Lean 4 proof checked by Gate 1 (`0 sorry`)
+│   ├── pass1_naive_fit.py                 # Pass 1 Builder output (fits only `head` rows -> R^2 = -0.25)
+│   └── pass2_remediated_fit.py            # Pass 2 Builder output (fixes `pk:evidenceAgainst` -> R^2 = 1.00)
 └── kg/
-    ├── pass1_sidecar.json           # Gate 2 independent verification of Pass 1
-    ├── pass1_audit.json             # Blinded Referee scores (49.4/100) + 2 remediation items
-    ├── pass1_claim.trig             # Pass 1 RDF Nanopub containing `pk:evidenceAgainst`
-    ├── pass2_sidecar.json           # Gate 2 independent verification of Pass 2
-    ├── pass2_audit.json             # Blinded Referee re-score (94.7/100, 0 remediation items)
-    └── pass2_claim.trig             # Pass 2 RDF Nanopub with `npx:supersedes` pointing to Pass 1
+    ├── explore_kg.html                    # Interactive HTML/SVG Knowledge Graph & TriG Explorer
+    ├── pass1_sidecar.json                 # Gate 2 independent verification of Pass 1
+    ├── pass1_audit.json                   # Blinded Referee scores (49.4/100) + 2 remediation items
+    ├── pass1_claim.trig                   # Pass 1 RDF Nanopub containing `pk:evidenceAgainst`
+    ├── pass2_sidecar.json                 # Gate 2 independent verification of Pass 2
+    ├── pass2_audit.json                   # Blinded Referee re-score (94.7/100, 0 remediation items)
+    └── pass2_claim.trig                   # Pass 2 RDF Nanopub with `npx:supersedes` pointing to Pass 1
 ```
 
 ---
 
-## 4. The 3 Orchestration Prompts (Verbatim)
+## 5. The 3 Orchestration Prompts (Verbatim)
 
 ### Prompt 1 — Frontier Builder Agent (`prompts/01_builder_prompt.md`)
 ```markdown
@@ -131,42 +148,4 @@ Querying the signed Pass 1 RDF Nanopublication (`kg/pass1_claim.trig`) returned 
 
 ## TASK
 Write `example/pass2_remediated_fit.py` fixing every `pk:evidenceAgainst` item above, and emit `example/pass2_metrics.json`. Your new output will be re-checked by `gates/2_measure_sidecar.py --pass-num 2` and `gates/3_compile_and_query_kg.py --pass-num 2` (which will mint `kg/pass2_claim.trig` with `npx:supersedes <https://w3id.org/delphi/np/pass1-example-claim>`).
-```
-
----
-
-## 5. Exact Output of `python3 run_loop.py`
-
-```text
-==========================================================================================
- PROJECT DELPHI — MINIMAL CLOSED-LOOP FRONTIER MODEL ORCHESTRATION & DETERMINISTIC GATES
-==========================================================================================
-
->>> STEP 1: Gate 1 — Verify SHA-256 Data Pin & Lean 4 Formal Law
-  [Gate 1 PASS] Data pin verified: `example/data.csv` (SHA-256: 8cc91f5297493571...)
-  [Gate 1 PASS] Lean 4 kernel verified `example/law.lean` (exit 0, 0 sorry)
-
->>> STEP 2: Pass 1 Builder Agent Output (`prompts/01_builder_prompt.md`)
-  [Pass 1 Builder] Wrote `example/pass1_metrics.json`: RMSE=44.2323 g, R^2=-0.2461
-
->>> STEP 3: Gate 2 — Zero-LLM Sidecar Verification (Pass 1)
-  [Gate 2 PASS] Sidecar `kg/pass1_sidecar.json` verified `pass1_metrics.json` (SHA-256=26455f9f9c24...)
-                Independent R^2 = -0.2461 | RMSE = 44.2323 g (Head MAE = 0.0945 g, Body MAE = 51.7015 g)
-
->>> STEP 4: Gate 3 — Blinded Referee Score & KG `pk:evidenceAgainst` Query (Pass 1)
-  [Gate 3 PASS] Compiled `kg/pass1_claim.trig` | Assessor: `gemini-4-argon` (Google DeepMind) | Weighted Rubric Score: 49.4 / 100
-  [KG QUERY] Extracted 2 `pk:evidenceAgainst` item(s) to inject into Remediation Prompt:
-             (1) remediation needed: Fit the power law y = a * x^b across the full organism (all 12 rows of example/data.csv, accounting for both head and body modules) instead of fitting a linear line only to the 6 head rows (line 49).
-             (2) remediation needed: Report the fitted power-law exponents b_head and b_body and verify that full-dataset R^2 exceeds 0.99.
-
->>> STEP 5: Pass 2 Remediation Builder Output (`prompts/03_remediation_prompt.md`)
-  [Pass 2 Builder] Wrote `example/pass2_metrics.json`: RMSE=0.0227 g, R^2=1.000000
-
->>> STEP 6: Gate 2 — Zero-LLM Sidecar Verification (Pass 2)
-  [Gate 2 PASS] Sidecar `kg/pass2_sidecar.json` verified `pass2_metrics.json` (SHA-256=ddb638b2e99b...)
-                Independent R^2 = 1.0000 | RMSE = 0.0227 g (Head MAE = 0.0051 g, Body MAE = 0.0286 g)
-
->>> STEP 7: Gate 3 — Superseding Nanopub (`npx:supersedes`) & Convergence Check (Pass 2)
-  [Gate 3 PASS] Compiled `kg/pass2_claim.trig` | Assessor: `gemini-4-argon` (Google DeepMind) | Weighted Rubric Score: 94.7 / 100
-  [KG QUERY] 0 `pk:evidenceAgainst` items remaining -> Loop Converged (>= 80 Faithful Band)!
 ```
