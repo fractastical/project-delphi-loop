@@ -1,8 +1,16 @@
-# Project Delphi — Minimal Closed-Loop Frontier Model Orchestration
+# Project Delphi — Closed-Loop Frontier Model Orchestration, Prompts & Gates
 
-> **Zero-dependency reference implementation** showing how Project Delphi integrates frontier models (`claude-fable-5-1` and `gemini-4-argon`) in a closed loop with **deterministic verification gates**, **blinded cross-provider refereeing**, and **RDF Nanopublication (`pk:evidenceAgainst`) feedback**.
+> **Clean, zero-dependency reference repository** showing how Project Delphi integrates frontier models (`claude-fable-5-1`, `gemini-4-argon`, `gpt-5.6-sol`) in a closed loop with **deterministic verification gates**, **blinded cross-provider refereeing**, and **RDF Nanopublication (`pk:evidenceAgainst`) feedback**.
 
-Run the entire Pass 1 $\to$ Audit $\to$ Knowledge-Graph Query $\to$ Pass 2 Remediation loop in **one command** (requires only Python 3 standard library; runs `lean` automatically if installed):
+![Project Delphi 12-Step Closed-Loop Architecture](./media/delphi_12step_closed_loop.gif)
+
+*12-Step Closed-Loop Architecture ([animated GIF](./media/delphi_12step_closed_loop.gif) · [high-res dark PNG](./media/delphi_12step_closed_loop.png) · [15-paper corpus overview GIF](./media/morphoeval_pipeline.gif)). Every frontier LLM step is bracketed by a deterministic gate (`gates/1_verify_inputs.py`, `gates/2_measure_sidecar.py`, `gates/3_compile_and_query_kg.py`). In Step 7, two models from different companies score the work in isolated worktrees; Step 9 compiles any defects into `pk:evidenceAgainst` RDF triples; and Step 12 feeds those triples back into Step 5 (`prompts/03_remediation_prompt.md`).*
+
+---
+
+## Run the Complete Closed Loop in One Command
+
+Requires **only the Python 3 standard library** (and runs `lean` automatically if installed):
 
 ```bash
 python3 run_loop.py
@@ -10,35 +18,13 @@ python3 run_loop.py
 
 ---
 
-## 1. The Simple Architectural Diagram (6 Nodes, 6 Typed Edges)
+## 1. Full 12-Step Closed-Loop Architecture (Two Views)
 
-Every LLM agent call is sandwiched between **deterministic, zero-LLM gates** so no model can hallucinate data, make up metrics, or grade its own code:
+### View A — Single-Cycle Dark-Mode Architecture (Prompts, Gates & `pk:evidenceAgainst` Feedback)
+![Single-Cycle 12-Step Closed-Loop Architecture](./media/delphi_12step_closed_loop.png)
 
-```mermaid
-flowchart LR
-    classDef gate fill:#dcfce7,stroke:#15803d,color:#0f172a
-    classDef llm fill:#f3e8ff,stroke:#7c3aed,color:#0f172a
-    classDef kg fill:#fee2e2,stroke:#b91c1c,color:#0f172a
-
-    G1["1. Gate 1: Input & Proof Gate\ngates/1_verify_inputs.py\n• Verifies SHA-256 of example/data.csv\n• Runs `lean example/law.lean` (0 sorry)"]:::gate
-
-    A1["2. Frontier Builder Agent\n(Anthropic claude-fable-5-1)\nPrompt: prompts/01_builder_prompt.md\nWrites: example/pass1_naive_fit.py"]:::llm
-
-    G2["3. Gate 2: Zero-LLM Sidecar\ngates/2_measure_sidecar.py\n• Hashes Builder output JSON\n• Independently computes R², RMSE,\n  Head MAE & Body MAE"]:::gate
-
-    A2["4. Blinded Referee Agent\n(Google gemini-4-argon)\nPrompt: prompts/02_referee_prompt.md\n• Isolated worktree (no prior scores)\n• Scores rubric.json + writes remediation[]"]:::llm
-
-    G3["5. Gate 3: RDF Nanopub Compiler\ngates/3_compile_and_query_kg.py\n• Emits kg/pass1_claim.trig\n• Encodes flaws as pk:evidenceAgainst"]:::kg
-
-    A3["6. Pass 2 Remediation Agent\nPrompt: prompts/03_remediation_prompt.md\n• Reads pk:evidenceAgainst from KG\n• Writes example/pass2_remediated_fit.py"]:::llm
-
-    G1 -- "Edge E1:\nexample/data.csv +\nexample/law.lean +\nrubric.json" --> A1
-    A1 -- "Edge E2:\nexample/pass1_metrics.json\n(predictions[])" --> G2
-    G2 -- "Edge E3:\nkg/pass1_sidecar.json\n(R²=-0.25, Body MAE=51.7g)" --> A2
-    A2 -- "Edge E4:\nkg/pass1_audit.json\n(Score: 49.4/100 +\nremediation[1..2])" --> G3
-    G3 -- "Edge E5 (Loop Closure):\npk:evidenceAgainst triples\nqueried from pass1_claim.trig" --> A3
-    A3 -- "Edge E6:\nexample/pass2_metrics.json\n(re-verified by Gates 2 & 3 ->\n94.7/100, npx:supersedes)" --> G2
-```
+### View B — Corpus-Wide 12-Step MorphoEval Pipeline (Showing Person vs. Multi-Company Agent Roles)
+![MorphoEval 12-Step Pipeline Across Models](./media/morphoeval_pipeline.png)
 
 ---
 
@@ -46,22 +32,27 @@ flowchart LR
 
 | Edge | Producer Component | Consumer Component | Exact File / Payload Passed | Exact Schema & Fields | Deterministic Verification Gate |
 | :-: | :--- | :--- | :--- | :--- | :--- |
-| **`E1`** | **Gate 1** (`gates/1_verify_inputs.py`) | **Builder Agent** (`prompts/01_builder_prompt.md`) | `example/data.csv`, `example/law.lean`, `rubric.json` | CSV: `specimen_id, region, length_mm, mass_g` (12 rows); Lean theorem `unit_length_recovers_prefactor` | `hashlib.sha256` must equal `8cc91f52...`; `lean example/law.lean` must exit `0` with `0 sorry` |
-| **`E2`** | **Builder Agent** (`example/pass1_naive_fit.py`) | **Gate 2 Sidecar** (`gates/2_measure_sidecar.py`) | `example/pass1_metrics.json` | `{"pass": 1, "script": "...", "fitted_params": {...}, "predictions": [12 floats], "reported_rmse_all": 44.2323, "reported_r2_all": -0.2461}` | Gate 2 hashes the file (`SHA-256: 26455f9f...`) and asserts `len(predictions) == 12` |
-| **`E3`** | **Gate 2 Sidecar** (`gates/2_measure_sidecar.py`) | **Blinded Referee Agent** (`prompts/02_referee_prompt.md`) | `kg/pass1_sidecar.json` | `{"artifact_sha256": "...", "independent_measurements": {"rmse_all_g": 44.2323, "r2_all": -0.2461, "mae_head_subset_g": 0.0945, "mae_body_subset_g": 51.7015}}` | Zero-LLM Python verifier independently re-derives $R^2$ and RMSE against `data.csv` and aborts if `|ΔRMSE| > 0.001` |
-| **`E4`** | **Blinded Referee Agent** (`gemini-4-argon`) | **Gate 3 KG Compiler** (`gates/3_compile_and_query_kg.py`) | `kg/pass1_audit.json` | `{"assessor_model": "gemini-4-argon", "blinded": true, "scores": {<7 rubric dims 0-100>}, "remediation": ["remediation needed: ..."]}` | Referee runs in an isolated worktree without prior audits; Gate 3 checks all 7 rubric weights sum to `100` |
-| **`E5`** | **Gate 3 KG Compiler** (`kg/pass1_claim.trig`) | **Pass 2 Remediation Agent** (`prompts/03_remediation_prompt.md`) | `pk:evidenceAgainst` RDF triples from `kg/pass1_claim.trig` | RDF literals: `"remediation needed: Fit the power law y = a * x^b across the full organism (all 12 rows)..."` | Extracted via deterministic regex/SPARQL query over `kg/pass1_claim.trig` (`Score: 49.4/100 < 80`) |
-| **`E6`** | **Pass 2 Remediation Agent** (`example/pass2_remediated_fit.py`) | **Gates 2 & 3 (Pass 2 Re-Score)** | `example/pass2_metrics.json` $\to$ `kg/pass2_claim.trig` | `r2_all: 1.0000`, `rmse_all_g: 0.0227`, `pk:hasScore "0.9470"`, `npx:supersedes <.../pass1-example-claim>` | `0` `pk:evidenceAgainst` items remain; score reaches **`94.7 / 100`** (`>= 80` faithful band) $\to$ **Loop Converges** |
+| **`E1`** | **Gate 1 (Steps 1–4)** (`gates/1_verify_inputs.py`) | **Builder Agent (Step 5)** (`prompts/01_builder_prompt.md`) | `example/data.csv`, `example/law.lean`, `rubric.json` | CSV: `specimen_id, region, length_mm, mass_g` (12 rows); Lean theorem `unit_length_recovers_prefactor` | `hashlib.sha256` must equal `8cc91f52...`; `lean example/law.lean` must exit `0` with `0 sorry` |
+| **`E2`** | **Builder Agent (Steps 5–6)** (`example/pass1_naive_fit.py`) | **Gate 2 Sidecar (Step 8)** (`gates/2_measure_sidecar.py`) | `example/pass1_metrics.json` | `{"pass": 1, "script": "...", "fitted_params": {...}, "predictions": [12 floats], "reported_rmse_all": 44.2323, "reported_r2_all": -0.2461}` | Gate 2 hashes the file (`SHA-256: 26455f9f...`) and asserts `len(predictions) == 12` |
+| **`E3`** | **Gate 2 Sidecar (Step 8)** (`gates/2_measure_sidecar.py`) | **Blinded Referee Agent (Step 7)** (`prompts/02_referee_prompt.md`) | `kg/pass1_sidecar.json` | `{"artifact_sha256": "...", "independent_measurements": {"rmse_all_g": 44.2323, "r2_all": -0.2461, "mae_head_subset_g": 0.0945, "mae_body_subset_g": 51.7015}}` | Zero-LLM Python verifier independently re-derives $R^2$ and RMSE against `data.csv` and aborts if `|ΔRMSE| > 0.001` |
+| **`E4`** | **Blinded Referee Agent (Step 7)** (`gemini-4-argon`) | **Gate 3 KG Compiler (Steps 9–11)** (`gates/3_compile_and_query_kg.py`) | `kg/pass1_audit.json` | `{"assessor_model": "gemini-4-argon", "blinded": true, "scores": {<7 rubric dims 0-100>}, "remediation": ["remediation needed: ..."]}` | Referee runs in an isolated worktree without prior audits; Gate 3 checks all 7 rubric weights sum to `100` |
+| **`E5`** | **Gate 3 KG Compiler (Steps 9–11)** (`kg/pass1_claim.trig`) | **Pass 2 Remediation Agent (Step 12 $\to$ Step 5)** (`prompts/03_remediation_prompt.md`) | `pk:evidenceAgainst` RDF triples from `kg/pass1_claim.trig` | RDF literals: `"remediation needed: Fit the power law y = a * x^b across the full organism (all 12 rows)..."` | Extracted via deterministic query over `kg/pass1_claim.trig` (`Score: 49.4/100 < 80`) |
+| **`E6`** | **Pass 2 Remediation Agent (Step 5 v2)** (`example/pass2_remediated_fit.py`) | **Gates 2 & 3 (Steps 7–11 v2)** | `example/pass2_metrics.json` $\to$ `kg/pass2_claim.trig` | `r2_all: 1.0000`, `rmse_all_g: 0.0227`, `pk:hasScore "0.9470"`, `npx:supersedes <.../pass1-example-claim>` | `0` `pk:evidenceAgainst` items remain; score reaches **`94.7 / 100`** (`>= 80` faithful band) $\to$ **Loop Converges** |
 
 ---
 
-## 3. Repository File Map (13 Small Files Total)
+## 3. Repository File Map
 
 ```text
 project-delphi-loop/
-├── README.md                        # Architecture diagram, 6-edge contract table & walkthrough
-├── run_loop.py                      # Single-command runner executing all 7 steps (Pass 1 -> Pass 2)
+├── README.md                        # Full closed-loop diagrams, 6-edge contract table & prompts
+├── run_loop.py                      # Single-command runner executing all 7 stages (Pass 1 -> Pass 2)
 ├── rubric.json                      # 7 weighted evaluation dimensions (weights sum to 100)
+├── media/
+│   ├── delphi_12step_closed_loop.gif # Animated 12-step closed-loop architecture (Pass 1 -> Pass 2)
+│   ├── delphi_12step_closed_loop.png # High-res dark-mode 12-step closed-loop diagram
+│   ├── morphoeval_pipeline.gif       # Animated 15-paper corpus pipeline diagram
+│   └── morphoeval_pipeline.png       # Static 15-paper corpus pipeline diagram
 ├── prompts/
 │   ├── 01_builder_prompt.md         # Verbatim prompt + input/output contract for Builder Agent
 │   ├── 02_referee_prompt.md         # Verbatim prompt + worktree blinding rules for Referee Agent
