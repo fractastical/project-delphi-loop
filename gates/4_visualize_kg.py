@@ -733,9 +733,6 @@ def render_discovery_loop_diagram(out_png: Path, out_gif: Path):
         return Image.open(buf).convert("RGB")
 
     summary_img = draw_disc_frame(None)
-    summary_img.save(out_png)
-    print(f"Saved Loop 2 Discovery diagram to {out_png}")
-
     frames = [draw_disc_frame(s) for s in (1, 2, 3, 4, 5)] + [summary_img, summary_img]
     frames[0].save(
         out_gif,
