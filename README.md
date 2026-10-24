@@ -14,11 +14,12 @@ Requires **only the Python 3 standard library** (and runs the `lean` kernel auto
 # Loop 1: How the Knowledge Graph is made, audited, and remediated (Pass 1: 49.4/100 -> Pass 2: 94.7/100)
 python3 run_loop.py
 
-# Loop 2: How we do scientific discovery from the Knowledge Graph (+58.7 dB, 3 Confirmed / 1 Falsified Horizon)
+# Loop 2: How we do scientific discovery from the Knowledge Graph (+58.7 dB, 3 Confirmed / 1 Falsified Horizon + MorphoSwarm Bridge)
 python3 run_discovery_loop.py
 
-# Query the Knowledge Graph across all 4 Nanopubs + Lean 4 theorems to synthesize solutions to hard problems
+# Query the Knowledge Graph across all 4 Nanopubs + Lean 4 theorems + MorphoSwarm Studio (`SPEC-074`) bridge
 python3 query_kg_solver.py --mode solve
+python3 query_kg_solver.py --mode morphoswarm
 ```
 
 ---
@@ -48,7 +49,7 @@ python3 query_kg_solver.py --mode solve
 
 *Loop 2 Scientific Discovery Architecture ([animated GIF](./media/delphi_discovery_loop.gif) · [high-res dark PNG](./media/delphi_discovery_loop.png)). Rather than stopping once a paper reproduction passes audit in Loop 1, Loop 2 queries the Knowledge Graph (`kg/pass1_claim.trig` $\to$ `kg/pass2_claim.trig`) to ask **why** the naive model failed (`b_head = 2.00` vs. `b_body = 3.00`), proves the underlying mathematical mechanism in Lean 4 (`discovery/discovery_law.lean`, `0 sorry`), runs a 4-way deconfounding ablation matrix (`discovery/1_synthesize_hypotheses.py`), **cryptographically locks out-of-sample predictions into Nanopub #3 (`kg/discovery_preregistration.trig`) BEFORE touching held-out data**, and evaluates the blind predictions via Gate 4b (`gates/6_score_blind_discovery.py` $\to$ Nanopub #4 `kg/discovery_outcome.trig`).*
 
-### Loop 2 Component-to-Component Data Contracts (`E7–E11`)
+### Loop 2 Component-to-Component Data Contracts (`E7–E12`)
 
 | Edge | Producer Component | Consumer Component | Exact File / Payload Passed | Exact Schema & Fields | Deterministic Verification Gate |
 | :-: | :--- | :--- | :--- | :--- | :--- |
@@ -57,6 +58,27 @@ python3 query_kg_solver.py --mode solve
 | **`E9`** | **Pre-Registration Agent Step 2** (`discovery/2_preregister_blind_predictions.py`) | **Gate 4b: Zero-LLM Blind Scorer** (`gates/6_score_blind_discovery.py`) | `discovery/blind_predictions_locked.csv` + **Nanopub #3** (`kg/discovery_preregistration.trig`) | 16 locked out-of-sample rows (`pred_iou_600pt_outline, pi95_low, pi95_high`) + `pk:lockedPredictionsSha256 "fd123b73f8058320..."` | **Strict Pre-Unblinding Lock:** Minted into `kg/discovery_preregistration.trig` *before* `heldout_blind_species.csv` is ever opened |
 | **`E10`** | **Gate 4b: Zero-LLM Blind Scorer** (`gates/6_score_blind_discovery.py`) | **Gate 5: Discovery KG Compiler** (`gates/7_compile_discovery_kg.py`) | `kg/discovery_blind_sidecar.json` | `H1: CONFIRMED (+24.1 dB)`, `H2: CONFIRMED (r=0.979, +18.4 dB)`, `H3: CONFIRMED (4.75x, +16.2 dB)`, `H4: FALSIFIED (tau*=48.6 Myr)`, `combined_weight_of_evidence_db: 58.7` | Aborts immediately if `blind_predictions_locked.csv` SHA-256 differs by 1 byte from `kg/discovery_preregistration.trig` |
 | **`E11`** | **Gate 5: Discovery KG Compiler** (`gates/7_compile_discovery_kg.py`) | **Knowledge Graph (`kg/discovery_outcome.trig`)** | **Nanopub #4** (`kg/discovery_outcome.trig`) | `a pk:DiscoveryClaim`, `npx:evaluatesPreRegistration <.../discovery-preregistration>`, `pk:confirmedHypothesis`, `pk:falsifiedHypothesis`, `pk:discoveredRegimeBoundary` | Permanently records both the 3 confirmed laws (`+58.7 dB`) and the falsified domain boundary (`tau* = 48.6 Myr`) in the RDF graph |
+| **`E12`** | **Gate 6: MorphoSwarm Studio Bridge** (`gates/8_bridge_morphoswarm_register.py`) | **MorphoSwarm Studio (`studio.morphoswarm.ai/problems`)** | `kg/morphoswarm_register_bridge.json` | `spec014_integrity_detectors` (`D1, D2, D3, D4, D5, D8`), `spec074_tab2_inferred_gaps_populated` (2), `spec074_tab1_field_problems_addressed` (3), `spec060_domain_pack_reconstruction` (`reconstructed`), `spec074_tab3_ours_spec_questions_resolved` (6) | Runs all 6 `SPEC-014` detectors (`6/6 PASS`), populates `SPEC-074` Tab 2 (`inferred-gap`), and verifies `SPEC-060` Rule 13 (`held-out` rows pass $\to$ `reconstructed`) |
+
+---
+
+## Connection to MorphoSwarm Studio (`studio.morphoswarm.ai/problems`)
+
+Gate 6 (`gates/8_bridge_morphoswarm_register.py`, queryable via `python3 query_kg_solver.py --mode morphoswarm`) connects the signed Loop 1 & Loop 2 Knowledge Graph (`kg/*.trig` + `Lean 4`) directly to **[MorphoSwarm Studio](https://studio.morphoswarm.ai/problems)** across its three core specifications:
+
+1. **`SPEC-074` Open Problems Register (`studio.morphoswarm.ai/problems`):**
+   - **Tab 2 (`inferred-gap`, *"Gaps we inferred"* — `0` entries on `studio.morphoswarm.ai` $\to$ `2` populated):** Automatically compiles the structural anomalies and falsified regime boundary from `kg/pass1_claim.trig`, `kg/pass2_claim.trig`, and `kg/discovery_outcome.trig` into two machine-checked `inferred-gap` entries:
+     - `ms:open-problem/head-landmark-density-seesaw-gap`: Why fitting global transformations to 17-landmark skeletal wireframes ($9/17 = 52.9\%$ head landmarks with $b_{\text{head}}=2.00$ vs. $b_{\text{body}}=3.00$) degrades whole-body outlines ($\mathrm{IoU}: 0.614 \to 0.562$), whereas 600-point whole-body outline fitting recovers $100\%$ of interfamily pairs ($\mathrm{IoU}=0.760$, $+24.1\text{ dB}$).
+     - `ms:open-problem/craniofacial-body-modularity-horizon-48myr`: Why single-grid 17-landmark invariance holds within $\sigma_{\text{genus}}$ below $\tau^* = 48.6\text{ Myr}$ ($100\%$) but drops to $0.0\%$ above $50\text{ Myr}$ as sympatric trophic competition accelerates craniofacial/jaw divergence $4.75\times$ faster than the body wall.
+   - **Tab 1 (`field-attested` & `field-attested-contested` — `0 impl` $\to$ `1 impl`):** Binds the verified models, 4-way deconfounding ablations, and Lean 4 theorems to three open field problems that previously had `n_implemented: 0` on `studio.morphoswarm.ai/problems`:
+     - `ms:open-problem/organ-proportion-allometry` (`doi:10.1186/s12915-015-0123-7`, `doi:10.1101/2025.08.25.671808`)
+     - `ms:open-problem/cichlid-jaw-integration-vs-modularity` (`doi:10.1186/s13227-022-00205-5`, `doi:10.1186/s12862-021-01787-9`)
+     - `ms:open-problem/axolotl-limb-allometric-regeneration` (`doi:10.7554/eLife.68584`)
+   - **Tab 3 (`ours` — 6 Open Spec Questions Resolved):** Provides concrete reference implementations for `spec-007-q4` (ProbKnow posterior/design templates), `spec-020-q2` (ablation arm pre-registration), `spec-031-q7` (null/falsified observation template via `pk:falsifiedHypothesis`), `spec-034-q3` (dual zero-LLM + blinded referee refutation), `spec-045-q3` (`independently-verified` cross-provider isolation), and `spec-074-q4` (open problems generating new loops).
+2. **`SPEC-060` / `SPEC-053` Domain Pack Reconstruction Ladder (`R1–R6`):**
+   - Clears `SPEC-060` Rule 13 (which holds packs at `fit-only` when no passing headline row is held-out) by evaluating 3 cryptographically pre-registered `held-out` headline rows (`AL1, AL2, AL3` on `discovery/heldout_blind_species.csv`, locked by SHA-256 `fd123b73f8058320...` in `kg/discovery_preregistration.trig` *before* unblinding), reaching **`reconstructed`** across `R1` through `R6`.
+3. **`SPEC-014` Integrity Detectors (`D1, D2, D3, D4, D5, D8` — `6/6 PASSED`):**
+   - Supplies the paired empirical/simulated series, SHA-256 pre-registration lock, non-canceling Lean 4 proofs (`0 sorry`), and zero-LLM sidecar records (`kg/pass2_sidecar.json`, `kg/discovery_blind_sidecar.json`) required to run and pass all 6 `SPEC-014` detectors deterministically.
 
 ---
 
@@ -104,7 +126,8 @@ project-delphi-loop/
 │   ├── 4_visualize_kg.py                      # Renders KG topology PNG, Loop 2 PNG/GIF & `kg/explore_kg.html`
 │   ├── 5_query_kg_for_discovery.py            # Gate 4a: Queries Loop 1 KG anomaly + verifies `discovery_law.lean`
 │   ├── 6_score_blind_discovery.py             # Gate 4b: Verifies pre-reg SHA-256 lock & scores blind data
-│   └── 7_compile_discovery_kg.py              # Gate 5: Emits Nanopub #4 (`kg/discovery_outcome.trig`)
+│   ├── 7_compile_discovery_kg.py              # Gate 5: Emits Nanopub #4 (`kg/discovery_outcome.trig`)
+│   └── 8_bridge_morphoswarm_register.py       # Gate 6: Bridges KG to MorphoSwarm Studio (`SPEC-074`/`060`/`014`)
 ├── example/                                   # Loop 1 artifacts (Pass 1 naive fit -> Pass 2 remediated fit)
 │   ├── data.csv                               # 12-row dataset (6 `head` rows + 6 `body` rows, SHA-256 pinned)
 │   ├── law.lean                               # Lean 4 proof for Loop 1 (`0 sorry`)
@@ -119,7 +142,7 @@ project-delphi-loop/
 │   ├── ablation_and_hypotheses.json           # Output of Step D2 (4-way ablation & calibrated parameters)
 │   └── blind_predictions_locked.csv           # Locked out-of-sample predictions committed in Nanopub #3
 └── kg/
-    ├── explore_kg.html                        # Interactive HTML/SVG Explorer for Nanopubs #1, #2, #3, and #4
+    ├── explore_kg.html                        # Interactive HTML/SVG Explorer for Nanopubs #1-#4 & MorphoSwarm Bridge
     ├── pass1_sidecar.json                     # Gate 2 independent verification of Pass 1
     ├── pass1_audit.json                       # Blinded Referee scores (49.4/100) + 2 remediation items
     ├── pass1_claim.trig                       # Nanopub #1: Pass 1 claim containing `pk:evidenceAgainst`
@@ -130,5 +153,6 @@ project-delphi-loop/
     ├── discovery_preregistration_manifest.json# Cryptographic pre-registration manifest
     ├── discovery_preregistration.trig         # Nanopub #3: Pre-registered predictions locked BEFORE unblinding
     ├── discovery_blind_sidecar.json           # Gate 4b zero-LLM blind scoring & Bayesian weight of evidence
-    └── discovery_outcome.trig                 # Nanopub #4: Discovery outcome (`+58.7 dB`, H1-H3 confirmed, H4 falsified)
+    ├── discovery_outcome.trig                 # Nanopub #4: Discovery outcome (`+58.7 dB`, H1-H3 confirmed, H4 falsified)
+    └── morphoswarm_register_bridge.json       # Gate 6: MorphoSwarm Studio (`SPEC-074`/`060`/`014`) payload
 ```

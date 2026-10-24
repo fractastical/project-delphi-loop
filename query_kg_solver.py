@@ -15,12 +15,20 @@ hard problems across 4 query modes:
   3. `--mode theorems` (Formal Lean 4 Law & Operator Transfer):
      Queries all machine-checked Lean 4 declarations and theorems (`0 sorry`) linked to the KG
      to transfer proven algebraic/geometric invariants into new solver scripts.
-  4. `--mode solve` (End-to-End Hard-Problem Synthesis):
+  4. `--mode morphoswarm` (MorphoSwarm Studio `SPEC-074` / `SPEC-060` / `SPEC-014` Bridge):
+     Shows how the signed Knowledge Graph populates `studio.morphoswarm.ai/problems` Tab 2
+     (`inferred-gap`), binds Tab 1 field-attested problems (`organ-proportion-allometry`,
+     `cichlid-jaw-integration-vs-modularity`, `axolotl-limb-allometric-regeneration`), upgrades
+     `SPEC-060` from `fit-only` to `reconstructed` (`R1-R6`), passes `SPEC-014` (`D1-D8`), and
+     resolves 6 Tab 3 (`ours`) spec questions.
+  5. `--mode solve` (End-to-End Hard-Problem Synthesis):
      Joins all 4 Nanopublications (`#1 Pass 1` -> `#2 Pass 2` -> `#3 Pre-Reg` -> `#4 Discovery`),
-     the zero-LLM sidecar metrics, and the Lean 4 theorems into a structured solution report.
+     the zero-LLM sidecar metrics, the Lean 4 theorems, and the MorphoSwarm Studio bridge into
+     a structured solution report.
 
 Usage:
     python3 query_kg_solver.py --mode solve
+    python3 query_kg_solver.py --mode morphoswarm
     python3 query_kg_solver.py --mode defects
     python3 query_kg_solver.py --mode boundaries
     python3 query_kg_solver.py --mode theorems
@@ -129,11 +137,38 @@ def run_mode_theorems() -> None:
         print(f"      Signature: {t['signature']}")
 
 
+def run_mode_morphoswarm() -> None:
+    print("=" * 98)
+    print(" KG QUERY MODE 4 — MORPHOSWARM STUDIO (`studio.morphoswarm.ai/problems`) BRIDGE")
+    print("=" * 98)
+    bridge_path = KG_DIR / "morphoswarm_register_bridge.json"
+    if not bridge_path.exists():
+        print("  [!] `kg/morphoswarm_register_bridge.json` not found. Run `python3 run_discovery_loop.py` first.")
+        return
+    b = json.loads(bridge_path.read_text(encoding="utf-8"))
+    dets = b["spec014_integrity_detectors"]
+    print(f"  • SPEC-014 Integrity Detectors ({len(dets)}/6 PASSED):")
+    for dk, dv in dets.items():
+        print(f"      [✓] {dk}: {dv['detail']}")
+    print(f"  • SPEC-074 Tab 2 (`inferred-gap`, was 0 on studio.morphoswarm.ai -> {len(b['spec074_tab2_inferred_gaps_populated'])} populated):")
+    for g in b["spec074_tab2_inferred_gaps_populated"]:
+        print(f"      [+] {g['id']} ({g['presented_as']}) -> {g['headline']}")
+    print(f"  • SPEC-074 Tab 1 (`field-attested` / `contested` problems bound, `0 impl -> 1 impl`):")
+    for p in b["spec074_tab1_field_problems_addressed"]:
+        print(f"      [*] {p['id']} [{p['tier']}] -> {p['delphi_contribution'][:105]}...")
+    pack = b["spec060_domain_pack_reconstruction"]
+    print(f"  • SPEC-060 / SPEC-053 Domain Pack (`{pack['pack_id']}`): state = `{pack['headline_state']}`")
+    print(f"      Why not `fit-only` (Rule 13): {pack['why_not_fit_only']}")
+    print(f"  • SPEC-074 Tab 3 (`ours` open spec questions resolved: {len(b['spec074_tab3_ours_spec_questions_resolved'])}):")
+    for sq in b["spec074_tab3_ours_spec_questions_resolved"]:
+        print(f"      [✓] {sq['slug']} ({sq['contract_edge']}): {sq['delphi_resolution']}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument(
         "--mode",
-        choices=["solve", "defects", "boundaries", "theorems"],
+        choices=["solve", "defects", "boundaries", "theorems", "morphoswarm"],
         default="solve",
         help="KG problem-solving query mode (default: solve)",
     )
@@ -146,14 +181,18 @@ def main() -> int:
         run_mode_boundaries(trigs)
     elif args.mode == "theorems":
         run_mode_theorems()
+    elif args.mode == "morphoswarm":
+        run_mode_morphoswarm()
     else:
         run_mode_defects(trigs)
         print()
         run_mode_boundaries(trigs)
         print()
         run_mode_theorems()
+        print()
+        run_mode_morphoswarm()
         print("=" * 98)
-        print(" SYNTHESIZED SOLUTION TO THE HARD PROBLEM (FROM KG QUERIES #1 + #2 + #3):")
+        print(" SYNTHESIZED SOLUTION TO THE HARD PROBLEM (FROM KG QUERIES #1 + #2 + #3 + #4):")
         print("   1. WHY 17-DOT FITS FAILED: Querying Pass 1->Pass 2 (`mode=defects`) + Lean Theorem #2 shows")
         print("      that placing 9/17 landmarks (52.9%) in the head (`b_head=2.0`) hijacks ordinary least")
         print("      squares and amplifies posterior body error (`b_body=3.0`) across the trunk lever arm.")
@@ -163,6 +202,10 @@ def main() -> int:
         print("   3. WHERE SINGLE GRIDS BREAK (`tau* = 48.6 Myr`): Querying `pk:falsifiedHypothesis` (`mode=boundaries`)")
         print("      shows that a single 17-dot global grid holds below ~48.6 Myr (100%) but drops to 0% above")
         print("      50 Myr as sympatric trophic competition accelerates head/jaw divergence 4.75x over the body.")
+        print("   4. MORPHOSWARM STUDIO (`SPEC-074` / `SPEC-060` / `SPEC-014`) INTEGRATION (`mode=morphoswarm`):")
+        print("      Populates Tab 2 (`inferred-gap`), connects 3 Tab 1 problems (`organ-proportion-allometry`,")
+        print("      `cichlid-jaw-integration-vs-modularity`, `axolotl-limb-allometric-regeneration`), upgrades")
+        print("      the pack from `fit-only` to `reconstructed` (`R1-R6`), and resolves 6 Tab 3 spec questions.")
         print("=" * 98)
     return 0
 

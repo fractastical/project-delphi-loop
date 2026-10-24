@@ -755,6 +755,8 @@ def build_interactive_html(out_html: Path):
     prereg_trig = (ROOT / "kg" / "discovery_preregistration.trig").read_text(encoding="utf-8")
     disc_trig = (ROOT / "kg" / "discovery_outcome.trig").read_text(encoding="utf-8")
     disc_sidecar = (ROOT / "kg" / "discovery_blind_sidecar.json").read_text(encoding="utf-8")
+    ms_bridge_path = ROOT / "kg" / "morphoswarm_register_bridge.json"
+    ms_bridge = ms_bridge_path.read_text(encoding="utf-8") if ms_bridge_path.exists() else "{}"
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -836,7 +838,7 @@ def build_interactive_html(out_html: Path):
 
   <div class="layout">
     <div class="panel">
-      <svg viewBox="0 0 820 620" width="100%" style="background:#090d13;border-radius:8px;border:1px solid #30363d;">
+      <svg viewBox="0 0 820 740" width="100%" style="background:#090d13;border-radius:8px;border:1px solid #30363d;">
         <defs>
           <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#3fb950"/>
@@ -946,6 +948,18 @@ def build_interactive_html(out_html: Path):
           <text x="630" y="558" fill="#f85149" font-size="10.5" font-family="monospace" text-anchor="middle">FALSIFIED: H4 &gt; 50 Myr (Horizon tau* = 48.6 Myr)</text>
           <text x="630" y="578" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">npx:evaluatesPreRegistration -&gt; Nanopub #3</text>
         </g>
+
+        <!-- Edge from Nanopub #4 to MorphoSwarm Bridge -->
+        <line x1="630" y1="595" x2="630" y2="628" stroke="#58a6ff" stroke-width="2.2" marker-end="url(#arrow-blue)"/>
+        <path d="M 190 595 Q 190 620 260 628" fill="none" stroke="#58a6ff" stroke-width="2.0" marker-end="url(#arrow-blue)"/>
+
+        <!-- Node 9: MorphoSwarm Studio Bridge -->
+        <g class="node-btn" onclick="selectNode('ms_bridge')">
+          <rect x="25" y="630" width="770" height="90" rx="8" fill="#111b27" stroke="#58a6ff" stroke-width="2.2"/>
+          <text x="410" y="654" fill="#58a6ff" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Gate 6: MorphoSwarm Studio Bridge (`kg/morphoswarm_register_bridge.json` -&gt; `studio.morphoswarm.ai/problems`)</text>
+          <text x="410" y="676" fill="#3fb950" font-size="10.5" font-family="monospace" text-anchor="middle">SPEC-014 Detectors: 6/6 PASSED (D1, D2, D3, D4, D5, D8) | SPEC-060 Pack: `fit-only` -&gt; `reconstructed` (R1-R6)</text>
+          <text x="410" y="698" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">SPEC-074 Tab 2 (`inferred-gap`): 0 -&gt; 2 Populated | Tab 1: 3 Open Problems Bound (`0 impl -&gt; 1 impl`) | Tab 3: 6 Specs Resolved</text>
+        </g>
       </svg>
     </div>
 
@@ -963,6 +977,7 @@ def build_interactive_html(out_html: Path):
         <button class="tab" onclick="selectNode('disc_prereg')">Nanopub #3 (Pre-Reg .trig)</button>
         <button class="tab" onclick="selectNode('disc_outcome')">Nanopub #4 (Discovery .trig)</button>
         <button class="tab" onclick="selectNode('disc_sidecar')">Loop 2 Blind Sidecar (.json)</button>
+        <button class="tab" onclick="selectNode('ms_bridge')">MorphoSwarm Bridge (.json)</button>
       </div>
       <pre id="code-box"></pre>
     </div>
@@ -1016,6 +1031,11 @@ const PAYLOADS = {{
     title: "Gate 4b Zero-LLM Blind Discovery Sidecar (kg/discovery_blind_sidecar.json)",
     desc: "Deterministic out-of-sample evaluation report with Bayesian Weight of Evidence in decibans (+58.7 dB) and the discovered modularity horizon tau* = 48.6 Myr:",
     code: {json.dumps(disc_sidecar)}
+  }},
+  ms_bridge: {{
+    title: "Gate 6 MorphoSwarm Studio Bridge (kg/morphoswarm_register_bridge.json)",
+    desc: "Bridges the signed Knowledge Graph (Nanopubs #1-#4 + Lean 4) to studio.morphoswarm.ai/problems (SPEC-074 Tab 1/Tab 2/Tab 3, SPEC-060 R1-R6 reconstruction, and SPEC-014 D1-D8 integrity detectors):",
+    code: {json.dumps(ms_bridge)}
   }}
 }};
 

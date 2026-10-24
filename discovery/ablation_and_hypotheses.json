@@ -4,7 +4,7 @@
   "four_way_deconfounding_ablation_interfamily": {
     "mean_iou_unwarped_similarity": 0.6165,
     "mean_iou_17dot_head_biased_seesaw": 0.5724,
-    "mean_iou_4p_box_stretch_homologous": 0.3702,
+    "mean_iou_4p_box_stretch_homologous": 0.3703,
     "mean_iou_600pt_direct_outline_warp": 0.7666,
     "seesaw_degradation_17dot_vs_unwarped": -0.0441,
     "true_warp_gain_over_4p_box": 0.3964

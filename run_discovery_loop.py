@@ -23,6 +23,12 @@ What this runs (in < 1 second):
   5. [Gate 5: Discovery Nanopub Compiler] (`gates/7_compile_discovery_kg.py`)
      Emits Nanopub #4 (`kg/discovery_outcome.trig`) linked via `npx:evaluatesPreRegistration` to
      `kg/discovery_preregistration.trig` and `kg/pass2_claim.trig`.
+  6. [Gate 6: MorphoSwarm Studio Register & Detector Bridge] (`gates/8_bridge_morphoswarm_register.py`)
+     Verifies all 6 `SPEC-014` integrity detectors (`D1, D2, D3, D4, D5, D8`), populates
+     `studio.morphoswarm.ai/problems` (`SPEC-074`) Tab 2 (`inferred-gap`), connects 3 Tab 1
+     field-attested problems (`organ-proportion-allometry`, `cichlid-jaw-integration-vs-modularity`,
+     `axolotl-limb-allometric-regeneration`), upgrades the `SPEC-060` pack state from `fit-only`
+     to `reconstructed` (`R1-R6`), and resolves 6 Tab 3 (`ours`) spec questions.
 """
 
 from __future__ import annotations
@@ -53,6 +59,10 @@ DISCOVERY_PIPELINE = [
     (
         "STEP D5: Gate 5 — Compile Discovery Outcome Nanopublication (`kg/discovery_outcome.trig`)",
         [sys.executable, "gates/7_compile_discovery_kg.py"],
+    ),
+    (
+        "STEP D6: Gate 6 — Bridge Knowledge Graph to MorphoSwarm Studio (`SPEC-074` / `SPEC-060` / `SPEC-014`)",
+        [sys.executable, "gates/8_bridge_morphoswarm_register.py"],
     ),
 ]
 

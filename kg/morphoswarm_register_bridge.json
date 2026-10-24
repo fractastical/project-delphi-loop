@@ -1,0 +1,223 @@
+{
+  "schema": "morphoswarm-spec074-spec060-spec014-bridge/v1",
+  "target_surface": "https://studio.morphoswarm.ai/problems",
+  "source_nanopubs": [
+    "kg/pass1_claim.trig",
+    "kg/pass2_claim.trig",
+    "kg/discovery_preregistration.trig",
+    "kg/discovery_outcome.trig"
+  ],
+  "spec014_integrity_detectors": {
+    "D1_score_integrity": {
+      "status": "passed",
+      "detail": "Rubric-weighted scores verified (Pass 1=49.4, Pass 2=94.71); not index arithmetic."
+    },
+    "D2_paired_series_independence": {
+      "status": "passed",
+      "detail": "Held-out empirical vs. predicted series verified (r=0.9788, 95% PI coverage=87.5%)."
+    },
+    "D3_sha256_and_prereg_lock": {
+      "status": "passed",
+      "detail": "Pre-unblinding SHA-256 lock (fd123b73f8058320...) matches `kg/discovery_preregistration.trig`."
+    },
+    "D4_lean4_non_canceling_proofs": {
+      "status": "passed",
+      "detail": "4 Lean 4 theorems verified with 0 sorry and 0 self-canceling definitions.",
+      "theorems": [
+        "example/law.lean::unit_length_recovers_prefactor",
+        "discovery/discovery_law.lean::nine_of_seventeen_head_bias_amplifies_posterior_error",
+        "discovery/discovery_law.lean::non_affine_warp_eliminates_box_stretch_residual",
+        "discovery/discovery_law.lean::module_decoupling_grows_with_divergence_time"
+      ]
+    },
+    "D5_script_runs_model": {
+      "status": "passed",
+      "detail": "AST verified: scripts execute module-specific power-law optimization and 4-way deconfounding ablations."
+    },
+    "D8_sidecar_measurement_agreement": {
+      "status": "passed",
+      "detail": "Zero-LLM sidecar agrees with reported RMSE within 0.000000 g and verifies blind hold-out."
+    }
+  },
+  "spec074_tab2_inferred_gaps_populated": [
+    {
+      "id": "ms:open-problem/head-landmark-density-seesaw-gap",
+      "slug": "head-landmark-density-seesaw-gap",
+      "tier": "inferred-gap",
+      "presented_as": "a gap we found",
+      "headline": "9/17 head-landmark density bias (52.9%) hijacks global least-squares grids and degrades whole-body outlines",
+      "statement": "Fitting a global coordinate transformation to standard 17-landmark reef-fish wireframes (where 9/17 landmarks sit in the head with scaling exponent b_head=2.0 vs. b_body=3.0) actively degrades whole-body outline overlap (mean IoU drops from 0.614 unwarped to 0.562), whereas direct 600-semilandmark outline fitting recovers 100% of interfamily pairs (mean IoU 0.760).",
+      "inferred_from_nanopubs": [
+        "https://w3id.org/delphi/np/pass1-example-claim",
+        "https://w3id.org/delphi/np/pass2-example-claim",
+        "https://w3id.org/delphi/np/discovery-outcome-claim"
+      ],
+      "lean_theorem": "ProjectDelphi.Discovery.nine_of_seventeen_head_bias_amplifies_posterior_error",
+      "bayesian_evidence_db": 24.08,
+      "levels": [
+        "organ",
+        "organism",
+        "developmental"
+      ],
+      "modules": [
+        "allometric-organ-scaling",
+        "diffeomorphic-coordinate-warp"
+      ]
+    },
+    {
+      "id": "ms:open-problem/craniofacial-body-modularity-horizon-48myr",
+      "slug": "craniofacial-body-modularity-horizon-48myr",
+      "tier": "inferred-gap",
+      "presented_as": "a gap we found",
+      "headline": "Single-grid 17-landmark invariance breaks at the tau* = 48.6 Myr craniofacial-vs-body modularity horizon",
+      "statement": "Across held-out phylogenetic divergences, a single global 17-landmark transformation holds within intrageneric disparity (<= 0.0110) on 100% of pairs below tau* = 48.6 Myr, but drops to 0.0% above 50 Myr because sympatric trophic competition accelerates craniofacial/jaw divergence 4.754x faster than axial body-wall divergence.",
+      "inferred_from_nanopubs": [
+        "https://w3id.org/delphi/np/discovery-preregistration",
+        "https://w3id.org/delphi/np/discovery-outcome-claim"
+      ],
+      "lean_theorem": "ProjectDelphi.Discovery.module_decoupling_grows_with_divergence_time",
+      "falsified_null": "H4_unbounded_17dot_single_grid_null",
+      "levels": [
+        "organ",
+        "organism",
+        "ecological"
+      ],
+      "modules": [
+        "allometric-organ-scaling",
+        "craniofacial-trophic-modularity"
+      ]
+    }
+  ],
+  "spec074_tab1_field_problems_addressed": [
+    {
+      "id": "ms:open-problem/organ-proportion-allometry",
+      "slug": "organ-proportion-allometry",
+      "tier": "field-attested",
+      "studio_prior_holdings": {
+        "n_implemented": 0
+      },
+      "sources": [
+        "doi:10.1186/s12915-015-0123-7 (2015)",
+        "doi:10.1101/2025.08.25.671808 (2025)"
+      ],
+      "delphi_contribution": "Loop 1 (`example/pass2_remediated_fit.py` + `example/law.lean`) and Loop 2 (`discovery/discovery_law.lean`) formally separate head surface-area scaling (`b_head = 2.00`) from body volumetric scaling (`b_body = 3.00`) and prove why coupling them under a single exponent causes a 547x posterior residual blowup.",
+      "nanopub_uri": "https://w3id.org/delphi/np/pass2-example-claim"
+    },
+    {
+      "id": "ms:open-problem/cichlid-jaw-integration-vs-modularity",
+      "slug": "cichlid-jaw-integration-vs-modularity",
+      "tier": "field-attested-contested",
+      "studio_prior_holdings": {
+        "n_implemented": 0
+      },
+      "sources": [
+        "doi:10.1186/s13227-022-00205-5 (2023, open)",
+        "doi:10.1186/s12862-021-01787-9 (2021, settled)"
+      ],
+      "delphi_contribution": "Loop 2 (`H3` & `H4` in `kg/discovery_outcome.trig`) resolves the timescale and ecological dependence: craniofacial/jaw and body modules remain integrated within a single Thompson grid below tau* = 48.6 Myr (100%), but decouple above 50 Myr (0%) driven by 4.754x faster sympatric jaw divergence (+16.2 dB).",
+      "nanopub_uri": "https://w3id.org/delphi/np/discovery-outcome-claim"
+    },
+    {
+      "id": "ms:open-problem/axolotl-limb-allometric-regeneration",
+      "slug": "axolotl-limb-allometric-regeneration",
+      "tier": "field-attested",
+      "studio_prior_holdings": {
+        "n_implemented": 0
+      },
+      "sources": [
+        "doi:10.7554/eLife.68584 (2021)"
+      ],
+      "delphi_contribution": "Provides the two-module allometric target law (`y = a_m * x^b_m`) and Lean 4 prefactor/exponent uniqueness theorems (`unit_length_recovers_prefactor`, `nine_of_seventeen_head_bias_amplifies_posterior_error`) for proportional multi-module growth.",
+      "nanopub_uri": "https://w3id.org/delphi/np/pass2-example-claim"
+    }
+  ],
+  "spec060_domain_pack_reconstruction": {
+    "pack_id": "teleostei-allometric-outline-modularity",
+    "spec": "SPEC-060 / SPEC-053 Reconstruction Ladder (R1-R6)",
+    "headline_state": "reconstructed",
+    "why_not_fit_only": "Clears SPEC-060 Rule 13 (`fit-only` blocker): 3 headline rows (AL1, AL2, AL3) are strictly held-out on 16 never-seen species pairs (`discovery/heldout_blind_species.csv`), cryptographically pre-registered by SHA-256 (`fd123b73f8058320...`) in `kg/discovery_preregistration.trig` BEFORE unblinding.",
+    "milestones": {
+      "R1_subject_displayable": "reached (`example/data.csv` & `discovery/landmark_vs_outline_data.csv` SHA-256 pinned)",
+      "R2_measured": "reached (`kg/pass2_sidecar.json` & `kg/discovery_blind_sidecar.json` zero-LLM sidecars)",
+      "R3_decomposed": "reached (`head` b=2.0 vs `body` b=3.0 modules + 4-way deconfounding ablation)",
+      "R4_mechanism_runs": "reached (`example/pass2_remediated_fit.py` & `discovery/1_synthesize_hypotheses.py`)",
+      "R5_criterion_evaluated": "reached (+58.68 dB Bayesian weight of evidence across pre-registered rows AL0-AL4)",
+      "R6_tested_against_specimen": "reached (16 held-out species pairs scored post-lock with 87.5% 95%-PI coverage)"
+    },
+    "criterion_rows": [
+      {
+        "id": "AL0",
+        "role": "headline",
+        "tuning": "may-consult",
+        "outcome": "pass",
+        "detail": "Two-module allometric fit R^2 = 1.0000 (Pass 2 `94.7/100`)"
+      },
+      {
+        "id": "AL1",
+        "role": "headline",
+        "tuning": "held-out",
+        "outcome": "pass",
+        "detail": "H1: 600-pt outline warp beats 17-dot seesaw & 4p box on 8/8 blind interfamily pairs (+24.1 dB)"
+      },
+      {
+        "id": "AL2",
+        "role": "headline",
+        "tuning": "held-out",
+        "outcome": "pass",
+        "detail": "H2: Out-of-sample error scales with divergence time tau (r = 0.979, 87.5% PI95 coverage, +18.4 dB)"
+      },
+      {
+        "id": "AL3",
+        "role": "headline",
+        "tuning": "held-out",
+        "outcome": "pass",
+        "detail": "H3: Sympatric sister pairs accelerate craniofacial/jaw divergence 4.754x over body (+16.2 dB)"
+      },
+      {
+        "id": "AL4",
+        "role": "boundary",
+        "tuning": "held-out",
+        "outcome": "falsified-horizon-recorded",
+        "detail": "H4: Single 17-dot grid falsified above tau* = 48.6 Myr (100% < 50 Myr vs 0% >= 50 Myr)"
+      }
+    ]
+  },
+  "spec074_tab3_ours_spec_questions_resolved": [
+    {
+      "slug": "spec-007-q4",
+      "question": "Which ProbKnow template covers a fitted parameter posterior and a design candidate?",
+      "delphi_resolution": "Implemented via `pk:Claim` (`kg/pass2_claim.trig`), `pk:PreRegisteredPrediction` (`kg/discovery_preregistration.trig`), and `pk:DiscoveryClaim` (`kg/discovery_outcome.trig`).",
+      "contract_edge": "E6, E9, E11"
+    },
+    {
+      "slug": "spec-020-q2",
+      "question": "Should predictions about the platform itself (ablation arm outcomes, SPEC-006) use this registry, or a separate one?",
+      "delphi_resolution": "Unified in the same Nanopub pre-registration graph (`kg/discovery_preregistration.trig`): 4-way ablation arms (`unwarped`, `17-dot`, `4p box`, `600-pt`) are locked alongside species predictions before unblinding.",
+      "contract_edge": "E8, E9"
+    },
+    {
+      "slug": "spec-031-q7",
+      "question": "Which governed template covers a null observation?",
+      "delphi_resolution": "Covered by `pk:falsifiedHypothesis` and `pk:discoveredRegimeBoundary` inside `kg/discovery_outcome.trig` (`H4` falsified above `tau* = 48.6 Myr`), preserving negative/null results as first-class RDF edges.",
+      "contract_edge": "E10, E11"
+    },
+    {
+      "slug": "spec-034-q3",
+      "question": "Who refutes?",
+      "delphi_resolution": "Dual refutation: (1) Zero-LLM deterministic sidecar (`gates/2_measure_sidecar.py` & `gates/6_score_blind_discovery.py`) and (2) Blinded cross-provider referee (`prompts/02_referee_prompt.md`) emitting `pk:evidenceAgainst`.",
+      "contract_edge": "E3, E4, E5, E10"
+    },
+    {
+      "slug": "spec-045-q3",
+      "question": "Is `independently-verified` achievable in-swarm?",
+      "delphi_resolution": "Yes: Builder (`claude-fable-5-1`) and Blinded Referee (`gemini-4-argon`) run in isolated worktrees bracketed by zero-LLM SHA-256 + Lean 4 (`0 sorry`) + sidecar verification gates (`gates/1..7`).",
+      "contract_edge": "E1, E3, E4, E7, E10"
+    },
+    {
+      "slug": "spec-074-q4",
+      "question": "Should an open problem be able to generate a project?",
+      "delphi_resolution": "Closed bidirectionally by Gate 6 (`gates/8_bridge_morphoswarm_register.py`): `pk:evidenceAgainst` and `pk:discoveredRegimeBoundary` generate `SPEC-074` `inferred-gap` entries, which seed new Loop 1/Loop 2 projects.",
+      "contract_edge": "E12"
+    }
+  ]
+}
