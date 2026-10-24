@@ -21,6 +21,7 @@ Outputs:
 
 from __future__ import annotations
 
+import csv
 import io
 import json
 from pathlib import Path
@@ -28,14 +29,58 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
-from PIL import Image
+from matplotlib.patches import Ellipse, FancyArrowPatch, FancyBboxPatch
+from PIL import Image, ImageSequence
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_PNG = ROOT / "media" / "delphi_knowledge_graph_network.png"
 OUT_DISC_PNG = ROOT / "media" / "delphi_discovery_loop.png"
 OUT_DISC_GIF = ROOT / "media" / "delphi_discovery_loop.gif"
 OUT_HTML = ROOT / "kg" / "explore_kg.html"
+
+
+def draw_person_icon(ax, x: float, y: float, s: float = 1.0, color: str = "#a855f7"):
+    ax.add_patch(Ellipse((x, y + 2.1 * s), 1.4 * s, 1.8 * s, fc=color, ec="none", zorder=6))
+    ax.add_patch(
+        FancyBboxPatch(
+            (x - 1.3 * s, y),
+            2.6 * s,
+            1.5 * s,
+            boxstyle="round,pad=0,rounding_size=0.8",
+            fc=color,
+            ec="none",
+            zorder=6,
+        )
+    )
+
+
+def draw_robot_icon(ax, x: float, y: float, s: float = 1.0, color: str = "#d97757"):
+    ax.add_patch(
+        FancyBboxPatch(
+            (x - 0.8 * s, y + 1.4 * s),
+            1.6 * s,
+            1.4 * s,
+            boxstyle="round,pad=0,rounding_size=0.3",
+            fc=color,
+            ec="none",
+            zorder=6,
+        )
+    )
+    ax.plot([x, x], [y + 2.8 * s, y + 3.4 * s], color=color, lw=1.1, zorder=6)
+    ax.add_patch(Ellipse((x, y + 3.5 * s), 0.48 * s, 0.4 * s, fc=color, ec="none", zorder=6))
+    for dx in (-0.34, 0.34):
+        ax.add_patch(Ellipse((x + dx * s, y + 2.15 * s), 0.38 * s, 0.38 * s, fc="white", ec="none", zorder=7))
+    ax.add_patch(
+        FancyBboxPatch(
+            (x - 1.3 * s, y),
+            2.6 * s,
+            1.2 * s,
+            boxstyle="round,pad=0,rounding_size=0.45",
+            fc=color,
+            ec="none",
+            zorder=6,
+        )
+    )
 
 
 def draw_kg_node(
@@ -512,234 +557,561 @@ def render_kg_png(out_png: Path):
 
 
 def render_discovery_loop_diagram(out_png: Path, out_gif: Path):
-    BG = "#0d1117"
-    CARD = "#161b22"
-    ACTIVE_BG = "#1e293b"
+    BG_MAIN = "#0d1117"
+    BG_CARD = "#161b22"
+    BG_BADGE = "#1f2937"
+    BG_ACTIVE = "#1e293b"
     STROKE = "#30363d"
-    BLUE = "#58a6ff"
-    GREEN = "#3fb950"
-    AMBER = "#d29922"
-    RED = "#f85149"
-    PURPLE = "#bc8cff"
+    TEXT_PRI = "#f0f6fc"
+    TEXT_SEC = "#8b949e"
+    TEXT_TER = "#6e7681"
+    ACCENT_BLUE = "#58a6ff"
+    ACCENT_GREEN = "#3fb950"
+    ACCENT_AMBER = "#d29922"
+    ACCENT_RED = "#f85149"
+    ACCENT_PURPLE = "#bc8cff"
+    ANTHROPIC_COL = "#d97757"
+    GOOGLE_COL = "#4285f4"
 
-    STEPS = [
+    # Load actual visual panels for the middle Box D4 (Discovery Ablation & Blind Test Gallery)
+    sibling_docs = ROOT.parent / "infinitemorphospace" / "docs"
+    gif_path = sibling_docs / "media" / "thompson_1917_silhouette_paradox_summary.gif"
+    box_warp_path = sibling_docs / "outreach_fig7_box_stretch_vs_true_thompson_warping.png"
+    blind_test_path = sibling_docs / "outreach_fig10_blind_test_fishshapes.png"
+
+    gif_frames: list[Image.Image] = []
+    if gif_path.exists():
+        with Image.open(gif_path) as im:
+            gif_frames = [f.convert("RGB") for f in ImageSequence.Iterator(im)]
+
+    img_d4b = Image.open(box_warp_path).convert("RGB") if box_warp_path.exists() else None
+    img_d4c = Image.open(blind_test_path).convert("RGB") if blind_test_path.exists() else None
+
+    TIER_A_DISC = [
         (
             1,
-            "STEP D1 — Query Loop 1 KG & Pin Lean 4 Laws",
-            "Gate 4a: `gates/5_query_kg_for_discovery.py`",
-            BLUE,
-            (4.0, 56.0, 28.0, 27.0),
-            [
-                "• Reads `kg/pass1_claim.trig` & `kg/pass2_claim.trig`",
-                "• Extracts exponent gap: b_head=2.0 vs b_body=3.0",
-                "• Verifies `discovery/discovery_law.lean` (0 sorry)",
-                "• Verifies `landmark_vs_outline_data.csv` SHA-256",
-                "• Emits `kg/discovery_anomaly_query.json`",
-            ],
+            "D1  KG Anomaly Query",
+            "Gate 4a: 5_query_kg_for_discovery.py",
+            "Reads pass1_claim & pass2_claim.trig",
+            "Finds b_head=2.00 vs b_body=3.00",
+            ACCENT_BLUE,
+            "human+google",
         ),
         (
             2,
-            "STEP D2 — 4-Way Ablation & Hypothesis Synthesis",
-            "Agent: `discovery/1_synthesize_hypotheses.py` (Prompt 4)",
-            PURPLE,
-            (36.0, 56.0, 28.0, 27.0),
-            [
-                "• Ablation 1: 17-Dot Head Seesaw degrades IoU",
-                "  (0.616 -> 0.572) vs 600-pt Outline (0.767)",
-                "• Ablation 2: 4p Box (0.370) vs True Warp (+0.396)",
-                "• Ablation 3: Sympatric Head/Body Rate = 4.78x",
-                "• Synthesizes falsifiable H1, H2, H3, and null H4",
-            ],
+            "D2  Pin Discovery Laws",
+            "Lean 4: discovery_law.lean (0 sorry)",
+            "3 Theorems + SHA-256: 0b50e8a0...",
+            "9/17 seesaw + box-warp + tau gap",
+            ACCENT_BLUE,
+            "lean",
         ),
         (
             3,
-            "STEP D3 — Cryptographic Blind Pre-Registration",
-            "Agent: `discovery/2_preregister_blind_predictions.py` (Prompt 5)",
-            AMBER,
-            (68.0, 56.0, 28.0, 27.0),
-            [
-                "• STRICT BLINDING: Never touches held-out data!",
-                "• Writes `discovery/blind_predictions_locked.csv`",
-                "• Computes SHA-256 lock `fd123b73f8058320...`",
-                "• Emits Nanopub #3: `discovery_preregistration.trig`",
-                "• Linked via `prov:wasDerivedFrom` -> Pass 2 KG",
-            ],
+            "D3  4-Way Ablation & H1–H4",
+            "Prompt: 04_discovery_hypothesis.md",
+            "1_synthesize_hypotheses.py",
+            "IoU: 0.616->0.572(17LM)->0.767(600pt)",
+            ACCENT_PURPLE,
+            "google",
         ),
         (
             4,
-            "STEP D4 — Zero-LLM Blind Unblinding & Falsification",
-            "Gate 4b: `gates/6_score_blind_discovery.py`",
-            RED,
-            (18.0, 12.0, 31.0, 29.0),
-            [
-                "• Verifies SHA-256 of locked predictions BEFORE",
-                "  unblinding `discovery/heldout_blind_species.csv`",
-                "• H1 (Outline Recovery 8/8): CONFIRMED (+24.1 dB)",
-                "• H2 (Error vs tau r=0.979): CONFIRMED (+18.4 dB)",
-                "• H3 (Sympatric 4.75x Jaw): CONFIRMED (+16.2 dB)",
-                "• H4 (>50 Myr 17-Dot Grid): FALSIFIED (tau*=48.6 Myr)",
-            ],
-        ),
-        (
-            5,
-            "STEP D5 — Discovery Outcome Nanopub & KG Update",
-            "Gate 5: `gates/7_compile_discovery_kg.py` (Prompt 6)",
-            GREEN,
-            (54.0, 12.0, 34.0, 29.0),
-            [
-                "• Emits Nanopub #4: `kg/discovery_outcome.trig`",
-                "• Predicate `npx:evaluatesPreRegistration` -> #3",
-                "• Records 3 Confirmed Laws (`+58.7 dB` combined)",
-                "• Records Honest Falsification of H4 (`tau* = 48.6 Myr`)",
-                "• Updates Knowledge Graph with domain boundary!",
-            ],
+            "D4  Blind Pre-Reg Lock",
+            "Prompt: 05_blind_preregistration.md",
+            "SHA-256: fd123b73f805... (BEFORE read)",
+            "Nanopub #3: discovery_prereg.trig",
+            ACCENT_AMBER,
+            "anthropic",
         ),
     ]
 
-    def draw_disc_frame(active_step: int | None = None) -> Image.Image:
-        fig, ax = plt.subplots(figsize=(14.5, 8.6), dpi=140, facecolor=BG)
+    TIER_B_DISC = [
+        (
+            5,
+            "D6  Zero-LLM Blind Scorer",
+            "Gate 4b: 6_score_blind_discovery.py",
+            "Verifies SHA-256 lock -> Unblinds CSV",
+            "Zero-LLM Python sidecar verifier",
+            "kg/discovery_blind_sidecar.json",
+            ACCENT_BLUE,
+        ),
+        (
+            6,
+            "D7  Confirmed Laws (+dB)",
+            "H1 (8/8) · H2 (r=0.979) · H3 (4.75x)",
+            "Weight of Evidence: +58.7 dB",
+            "gemini-4-argon + claude-fable-5-1",
+            "pk:confirmedHypothesis (3 laws)",
+            ACCENT_GREEN,
+        ),
+        (
+            7,
+            "D8  Honest Falsification",
+            "H4 (>50 Myr 17-Dot Grid): FALSIFIED",
+            "100% <50 Myr -> 0.0% >=50 Myr",
+            "Establishes tau* = 48.6 Myr horizon",
+            "pk:falsifiedHypothesis + boundary",
+            ACCENT_RED,
+        ),
+        (
+            8,
+            "D9  Discovery Nanopub #4",
+            "Gate 5: 7_compile_discovery_kg.py",
+            "npx:evaluatesPreRegistration -> #3",
+            "Links to Pass 2 KG (prov:wasDerivedFrom)",
+            "kg/discovery_outcome.trig",
+            ACCENT_GREEN,
+        ),
+        (
+            9,
+            "D10 MorphoSwarm Bridge",
+            "Gate 6: 8_bridge_morphoswarm.py",
+            "SPEC-014 (6/6) · SPEC-060 Reconstructed",
+            "Populates SPEC-074 Tab 2 (2 gaps)",
+            "studio.morphoswarm.ai/problems",
+            ACCENT_PURPLE,
+        ),
+    ]
+
+    def draw_disc_frame(g_idx: int = 0) -> Image.Image:
+        fig, ax = plt.subplots(figsize=(14.5, 9.2), dpi=140, facecolor=BG_MAIN)
         fig.subplots_adjust(0, 0, 1, 1)
-        ax.set_facecolor(BG)
+        ax.set_facecolor(BG_MAIN)
         ax.set_xlim(0, 100)
         ax.set_ylim(0, 100)
         ax.axis("off")
 
+        # Outer frame
         ax.add_patch(
             FancyBboxPatch(
                 (1.2, 2.0),
                 97.6,
-                87.0,
+                86.8,
                 boxstyle="round,pad=0.3,rounding_size=1.4",
-                fc=BG,
+                fc=BG_MAIN,
                 ec=STROKE,
                 lw=1.2,
                 zorder=1,
             )
         )
 
+        # Top header
         ax.text(
-            2.2,
-            95.5,
-            "Project Delphi Loop 2 — Knowledge-Graph-Driven Scientific Discovery & Blind Pre-Registration",
-            color="#f0f6fc",
+            2.0,
+            95.8,
+            "Project Delphi Loop 2 — Knowledge-Graph-Driven Scientific Discovery & Cryptographic Blind Pre-Registration",
+            color=TEXT_PRI,
             fontsize=13.5,
             fontweight="bold",
             va="center",
         )
         ax.text(
-            2.2,
-            91.4,
-            "Starts from Loop 1 KG (`kg/pass2_claim.trig`) -> Synthesizes Deconfounded Hypotheses + Lean 4 Proofs -> "
-            "Locks Pre-Registration SHA-256 BEFORE Unblinding -> Scores Held-Out Data (+58.7 dB)",
-            color=GREEN if active_step in (None, 5) else BLUE,
+            2.0,
+            91.6,
+            "Queries Loop 1 KG (`b_head=2.0` vs `b_body=3.0`) → 4-Way Deconfounding Ablation → Locks Nanopub #3 (`SHA-256: fd123b73...`) "
+            "BEFORE Unblinding → Scores Blind Data (`+58.7 dB`)",
+            color=ACCENT_GREEN,
+            fontsize=8.6,
+            fontweight="bold",
+            va="center",
+        )
+        ax.text(
+            98.4,
+            95.8,
+            "Repo: fractastical/project-delphi-loop · studio.morphoswarm.ai",
+            color=TEXT_SEC,
             fontsize=8.5,
+            ha="right",
+            va="center",
+        )
+        ax.text(
+            98.4,
+            91.6,
+            "Models: gemini-4-argon (Google) × claude-fable-5-1 (Anthropic) · SPEC-074 / 060 / 014",
+            color=ACCENT_PURPLE,
+            fontsize=8.5,
+            fontweight="bold",
+            ha="right",
+            va="center",
+        )
+
+        # Tier A Header
+        ax.text(
+            2.8,
+            85.4,
+            "A  Formulating & Pre-Registering a Discovery — Query KG Anomaly → Pin Lean 4 Proof (`0 sorry`) → 4-Way Ablation → Lock SHA-256 Before Unblinding",
+            color=TEXT_PRI,
+            fontsize=9.3,
             fontweight="bold",
             va="center",
         )
 
-        for snum, stitle, sgate, scol, (x, y, w, h), lines in STEPS:
-            is_act = active_step == snum
+        tier_a_x = [2.8, 22.8, 42.8, 62.8]
+        box_a_w, box_a_h, box_a_y = 18.4, 16.5, 66.5
+
+        for idx, (snum, stitle, b1, b2, foot_lbl, col, icon_kind) in enumerate(TIER_A_DISC):
+            x = tier_a_x[idx]
+            y = box_a_y
             ax.add_patch(
                 FancyBboxPatch(
                     (x, y),
-                    w,
-                    h,
-                    boxstyle="round,pad=0.22,rounding_size=1.0",
-                    fc=ACTIVE_BG if is_act else CARD,
-                    ec=scol if (is_act or active_step is None) else STROKE,
-                    lw=2.5 if is_act else 1.5,
+                    box_a_w,
+                    box_a_h,
+                    boxstyle="round,pad=0.2,rounding_size=0.9",
+                    fc=BG_CARD,
+                    ec=col,
+                    lw=1.4,
+                    zorder=2,
+                )
+            )
+            ax.text(x + 0.7, y + box_a_h - 2.3, stitle, color=TEXT_PRI, fontsize=8.4, fontweight="bold", va="center", zorder=3)
+
+            if icon_kind == "human+google":
+                draw_person_icon(ax, x + box_a_w - 3.0, y + box_a_h - 3.2, s=0.50, color=ACCENT_PURPLE)
+                draw_robot_icon(ax, x + box_a_w - 1.3, y + box_a_h - 3.2, s=0.48, color=GOOGLE_COL)
+            elif icon_kind == "google":
+                draw_robot_icon(ax, x + box_a_w - 1.6, y + box_a_h - 3.2, s=0.52, color=GOOGLE_COL)
+            elif icon_kind == "anthropic":
+                draw_robot_icon(ax, x + box_a_w - 1.6, y + box_a_h - 3.2, s=0.52, color=ANTHROPIC_COL)
+
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x + 0.6, y + box_a_h - 6.8),
+                    box_a_w - 1.2,
+                    2.8,
+                    boxstyle="round,pad=0.08,rounding_size=0.4",
+                    fc=BG_BADGE,
+                    ec="none",
                     zorder=3,
                 )
             )
+            ax.text(x + 0.9, y + box_a_h - 5.4, b1, color=col, fontsize=7.0, fontweight="bold", va="center", zorder=4)
+
             ax.add_patch(
                 FancyBboxPatch(
-                    (x + 0.6, y + h - 3.6),
-                    w - 1.2,
+                    (x + 0.6, y + box_a_h - 10.2),
+                    box_a_w - 1.2,
                     2.8,
-                    boxstyle="round,pad=0.08,rounding_size=0.45",
-                    fc=scol,
+                    boxstyle="round,pad=0.08,rounding_size=0.4",
+                    fc=BG_BADGE,
                     ec="none",
-                    zorder=4,
+                    zorder=3,
                 )
             )
+            ax.text(x + 0.9, y + box_a_h - 8.8, b2, color=TEXT_PRI, fontsize=6.9, fontweight="bold", va="center", zorder=4)
+
+            ax.text(x + 0.7, y + 3.9, foot_lbl, color=TEXT_SEC, fontsize=6.9, family="monospace", va="center", zorder=3)
             ax.text(
-                x + w / 2,
-                y + h - 2.2,
-                stitle,
-                color="#0d1117" if scol in (GREEN, AMBER, BLUE) else "#f0f6fc",
-                fontsize=8.0,
+                x + 0.7,
+                y + 1.6,
+                f"Edge E{idx + 7}: Verified Gate Pass",
+                color=col,
+                fontsize=6.8,
                 fontweight="bold",
-                family="monospace",
-                ha="center",
                 va="center",
-                zorder=5,
+                zorder=3,
             )
-            ax.text(
-                x + 0.8,
-                y + h - 6.0,
-                sgate,
-                color=scol,
-                fontsize=7.3,
-                fontweight="bold",
-                family="monospace",
-                va="center",
-                zorder=5,
-            )
-            for idx, ln in enumerate(lines):
-                lcol = (
-                    GREEN
-                    if ("CONFIRMED" in ln or "+58.7" in ln or "0 sorry" in ln)
-                    else (RED if "FALSIFIED" in ln or "degrades" in ln else "#c9d1d9")
-                )
-                ax.text(
-                    x + 0.8,
-                    y + h - 9.4 - idx * 3.1,
-                    ln,
-                    color=lcol,
-                    fontsize=7.1,
-                    family="monospace",
-                    va="center",
-                    zorder=5,
+
+            if idx < 3:
+                ax.add_patch(
+                    FancyArrowPatch(
+                        (x + box_a_w + 0.15, y + box_a_h / 2),
+                        (tier_a_x[idx + 1] - 0.15, y + box_a_h / 2),
+                        arrowstyle="-|>",
+                        mutation_scale=10,
+                        lw=1.3,
+                        color=TEXT_SEC,
+                        zorder=3,
+                    )
                 )
 
-        # Arrows connecting the 5 steps + closed feedback to KG
-        draw_predicate_edge(ax, (32.0, 69.5), (36.0, 69.5), "E7: Anomaly\n+ Lean 4", BLUE, ly=3.5)
-        draw_predicate_edge(ax, (64.0, 69.5), (68.0, 69.5), "E8: H1..H4\nAblations", PURPLE, ly=3.5)
-        draw_predicate_edge(
-            ax,
-            (82.0, 56.0),
-            (33.5, 41.0),
-            "E9: SHA-256 Locked Nanopub #3 (`discovery_preregistration.trig`)",
-            AMBER,
-            rad=-0.12,
-            ly=2.2,
+        # Arrow Step D4 -> Box D5 (Middle Gallery)
+        s4_cx = tier_a_x[3] + 9.2
+        ax.add_patch(
+            FancyArrowPatch(
+                (s4_cx, box_a_y - 0.2),
+                (s4_cx, 60.8),
+                arrowstyle="-|>",
+                mutation_scale=11,
+                lw=1.5,
+                color=ACCENT_AMBER,
+                zorder=3,
+            )
         )
-        draw_predicate_edge(ax, (49.0, 26.5), (54.0, 26.5), "E10: Blind\nSidecar", RED, ly=3.8)
-        draw_predicate_edge(
-            ax,
-            (54.0, 16.0),
-            (12.0, 56.0),
-            "E11: Updates KG with Confirmed Laws (+58.7 dB) & Honest Domain Boundary (tau* = 48.6 Myr)",
-            GREEN,
-            rad=-0.22,
-            ls="--",
-            ly=-4.2,
+        ax.text(
+            s4_cx - 24.0,
+            63.5,
+            "Edge E9: Locks `blind_predictions_locked.csv` (`SHA-256: fd123b73...`) in Nanopub #3 BEFORE unblinding",
+            color=ACCENT_AMBER,
+            fontsize=7.3,
+            fontweight="bold",
+            va="center",
+        )
+
+        # Middle Box D5: Deconfounding Ablations & Blind Test Evidence Gallery
+        box6_x, box6_y, box6_w, box6_h = 2.8, 31.5, 79.8, 29.0
+        ax.add_patch(
+            FancyBboxPatch(
+                (box6_x, box6_y),
+                box6_w,
+                box6_h,
+                boxstyle="round,pad=0.25,rounding_size=1.0",
+                fc=BG_CARD,
+                ec=ACCENT_PURPLE,
+                lw=1.4,
+                zorder=2,
+            )
+        )
+        ax.text(
+            box6_x + 1.3,
+            box6_y + box6_h - 2.6,
+            "D5  Deconfounding Ablations & Pre-Registered Blind Test Evidence (Scored by Zero-LLM Gate 4b)",
+            color=TEXT_PRI,
+            fontsize=9.4,
+            fontweight="bold",
+            va="center",
+            zorder=3,
+        )
+        ax.add_patch(
+            FancyBboxPatch(
+                (box6_x + 50.5, box6_y + box6_h - 4.3),
+                28.2,
+                3.3,
+                boxstyle="round,pad=0.1,rounding_size=0.5",
+                fc=BG_BADGE,
+                ec="none",
+                zorder=3,
+            )
+        )
+        ax.text(
+            box6_x + 51.1,
+            box6_y + box6_h - 2.65,
+            "H1–H3 CONFIRMED (+58.7 dB) | H4 FALSIFIED (>48.6 Myr)",
+            color=ACCENT_GREEN,
+            fontsize=7.3,
+            fontweight="bold",
+            va="center",
+            zorder=4,
+        )
+
+        sub_y0, sub_y1 = box6_y + 4.4, box6_y + box6_h - 5.2
+        # Panel A: Animated 17-Dot Seesaw vs 600-Pt Outline Recovery
+        if gif_frames:
+            f_im = gif_frames[g_idx % len(gif_frames)]
+            ax.imshow(f_im, extent=(4.2, 29.2, sub_y0, sub_y1), zorder=3, interpolation="bilinear", aspect="auto")
+            ax.add_patch(FancyBboxPatch((4.2, sub_y0), 25.0, sub_y1 - sub_y0, boxstyle="square,pad=0", fc="none", ec=ACCENT_GREEN, lw=1.1, zorder=4))
+        ax.text(
+            16.7,
+            box6_y + 2.2,
+            "A. H1: 9/17 Head Seesaw (0.572) vs 600-pt Outline (0.767)",
+            color=ACCENT_GREEN,
+            fontsize=7.0,
+            fontweight="bold",
+            ha="center",
+            va="center",
+            zorder=4,
+        )
+
+        # Panel B: 4p Box Stretch Deconfounding vs True Non-Affine Thompson Warp
+        if img_d4b is not None:
+            ax.imshow(img_d4b, extent=(30.4, 55.4, sub_y0, sub_y1), zorder=3, interpolation="bilinear", aspect="auto")
+            ax.add_patch(FancyBboxPatch((30.4, sub_y0), 25.0, sub_y1 - sub_y0, boxstyle="square,pad=0", fc="none", ec=ACCENT_BLUE, lw=1.1, zorder=4))
+        ax.text(
+            42.9,
+            box6_y + 2.2,
+            "B. Deconfounding: 4p Box (0.370) vs Non-Affine Warp (+0.396)",
+            color=TEXT_PRI,
+            fontsize=7.0,
+            fontweight="bold",
+            ha="center",
+            va="center",
+            zorder=4,
+        )
+
+        # Panel C: Pre-Registered Blind Test & Evolutionary Modularity Horizon tau* = 48.6 Myr
+        if img_d4c is not None:
+            ax.imshow(img_d4c, extent=(56.6, 81.4, sub_y0, sub_y1), zorder=3, interpolation="bilinear", aspect="auto")
+            ax.add_patch(FancyBboxPatch((56.6, sub_y0), 24.8, sub_y1 - sub_y0, boxstyle="square,pad=0", fc="none", ec=ACCENT_AMBER, lw=1.1, zorder=4))
+        ax.text(
+            69.0,
+            box6_y + 2.2,
+            "C. Blind Test (r=0.979) & H4 Horizon Boundary (tau*=48.6 Myr)",
+            color=ACCENT_AMBER,
+            fontsize=7.0,
+            fontweight="bold",
+            ha="center",
+            va="center",
+            zorder=4,
+        )
+
+        # Arrow Box D5 -> Step D6
+        s6_cx = 10.0
+        ax.add_patch(
+            FancyArrowPatch(
+                (s6_cx, box6_y - 0.2),
+                (s6_cx, 25.0),
+                arrowstyle="-|>",
+                mutation_scale=11,
+                lw=1.5,
+                color=ACCENT_GREEN,
+                zorder=3,
+            )
+        )
+        ax.text(
+            s6_cx + 0.8,
+            29.2,
+            "Edge E10: Zero-LLM `gates/6_score_blind_discovery.py` verifies pre-unblinding SHA-256 lock before scoring held-out species",
+            color=TEXT_SEC,
+            fontsize=7.4,
+            va="center",
+        )
+
+        # Tier B Header
+        ax.text(
+            2.8,
+            26.6,
+            "B  Unblinding, Honest Falsification & KG / MorphoSwarm Registration — Zero-LLM Blind Scorer → +58.7 dB Nanopub #4 → SPEC-074 Open Problems",
+            color=TEXT_PRI,
+            fontsize=9.1,
+            fontweight="bold",
+            va="center",
+        )
+
+        tier_b_x = [2.8, 18.9, 35.0, 51.1, 67.2]
+        box_b_w, box_b_h, box_b_y = 14.8, 16.8, 7.6
+
+        for idx, (snum, stitle, b1, b2, actor_lbl, foot_lbl, col) in enumerate(TIER_B_DISC):
+            x = tier_b_x[idx]
+            y = box_b_y
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x, y),
+                    box_b_w,
+                    box_b_h,
+                    boxstyle="round,pad=0.2,rounding_size=0.9",
+                    fc=BG_CARD,
+                    ec=col,
+                    lw=1.4,
+                    zorder=2,
+                )
+            )
+            ax.text(x + 0.6, y + box_b_h - 2.3, stitle, color=TEXT_PRI, fontsize=8.0, fontweight="bold", va="center", zorder=3)
+
+            if idx == 1:
+                draw_robot_icon(ax, x + box_b_w - 2.8, y + box_b_h - 3.1, s=0.45, color=GOOGLE_COL)
+                draw_robot_icon(ax, x + box_b_w - 1.2, y + box_b_h - 3.1, s=0.45, color=ANTHROPIC_COL)
+            elif idx == 4:
+                draw_person_icon(ax, x + box_b_w - 1.4, y + box_b_h - 3.1, s=0.48, color=ACCENT_PURPLE)
+
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x + 0.5, y + box_b_h - 6.7),
+                    box_b_w - 1.0,
+                    2.8,
+                    boxstyle="round,pad=0.06,rounding_size=0.35",
+                    fc=BG_BADGE,
+                    ec="none",
+                    zorder=3,
+                )
+            )
+            ax.text(x + 0.75, y + box_b_h - 5.3, b1, color=col, fontsize=6.75, fontweight="bold", va="center", zorder=4)
+
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x + 0.5, y + box_b_h - 10.0),
+                    box_b_w - 1.0,
+                    2.8,
+                    boxstyle="round,pad=0.06,rounding_size=0.35",
+                    fc=BG_BADGE,
+                    ec="none",
+                    zorder=3,
+                )
+            )
+            ax.text(x + 0.75, y + box_b_h - 8.6, b2, color=TEXT_PRI, fontsize=6.75, fontweight="bold", va="center", zorder=4)
+
+            ax.text(x + 0.6, y + 4.2, actor_lbl, color=TEXT_SEC, fontsize=6.7, va="center", zorder=3)
+            ax.text(x + 0.6, y + 1.8, foot_lbl, color=col, fontsize=6.7, fontweight="bold", family="monospace", va="center", zorder=3)
+
+            if idx < 4:
+                ax.add_patch(
+                    FancyArrowPatch(
+                        (x + box_b_w + 0.12, y + box_b_h / 2),
+                        (tier_b_x[idx + 1] - 0.12, y + box_b_h / 2),
+                        arrowstyle="-|>",
+                        mutation_scale=9,
+                        lw=1.2,
+                        color=ACCENT_GREEN,
+                        zorder=3,
+                    )
+                )
+
+        # Right-hand DISCOVERY LOOP feedback channel (D10 -> D1 / Next Loop)
+        loop_x = 90.6
+        ax.plot([loop_x, loop_x], [box_b_y + box_b_h, 31.8], color=ACCENT_PURPLE, lw=2.2, ls="--", zorder=3)
+        ax.add_patch(
+            FancyArrowPatch(
+                (loop_x, 60.5),
+                (76.0, box_a_y + box_a_h / 2),
+                connectionstyle="arc3,rad=-0.18",
+                arrowstyle="-|>",
+                mutation_scale=13,
+                lw=2.2,
+                ls="--",
+                color=ACCENT_PURPLE,
+                zorder=4,
+            )
+        )
+        ax.add_patch(
+            FancyBboxPatch(
+                (83.5, 31.8),
+                14.2,
+                28.5,
+                boxstyle="round,pad=0.2,rounding_size=0.9",
+                fc=BG_CARD,
+                ec=ACCENT_PURPLE,
+                lw=1.9,
+                zorder=4,
+            )
+        )
+        ax.text(90.6, 57.8, "DISCOVERY LOOP", color=ACCENT_PURPLE, fontsize=8.0, fontweight="bold", ha="center", va="center", zorder=5)
+        ax.text(90.6, 55.0, "Edge E11 & E12:", color=TEXT_SEC, fontsize=6.8, ha="center", va="center", zorder=5)
+        ax.text(90.6, 52.6, "pk:DiscoveryClaim", color=ACCENT_GREEN, fontsize=7.1, fontweight="bold", family="monospace", ha="center", va="center", zorder=5)
+        ax.text(90.6, 49.8, "3 Confirmed Laws:", color=TEXT_SEC, fontsize=6.8, ha="center", va="center", zorder=5)
+        ax.text(90.6, 47.4, "+58.7 dB Evidence", color=ACCENT_GREEN, fontsize=7.1, fontweight="bold", ha="center", va="center", zorder=5)
+        ax.plot([84.3, 96.9], [45.0, 45.0], color=STROKE, lw=0.9, zorder=5)
+        ax.text(90.6, 42.6, "1 Falsified Boundary:", color=TEXT_PRI, fontsize=6.8, fontweight="bold", ha="center", va="center", zorder=5)
+        ax.text(90.6, 40.2, "tau* = 48.6 Myr", color=ACCENT_RED, fontsize=7.1, fontweight="bold", ha="center", va="center", zorder=5)
+        ax.text(90.6, 37.4, "SPEC-074 Tab 2:", color=TEXT_SEC, fontsize=6.8, ha="center", va="center", zorder=5)
+        ax.text(90.6, 34.8, "2 Inferred Gaps -> Loop", color=ACCENT_PURPLE, fontsize=6.9, fontweight="bold", ha="center", va="center", zorder=5)
+
+        # Bottom summary bar
+        ax.text(
+            2.8,
+            4.3,
+            "How Discovery Works: Gate 4a queries Loop 1 KG anomalies → Lean 4 (`0 sorry`) & 4-way ablations deconfound hypotheses → "
+            "Nanopub #3 locks predictions by SHA-256 BEFORE unblinding → Gate 4b scores blind data (+58.7 dB) & updates SPEC-074.",
+            color=TEXT_SEC,
+            fontsize=7.9,
+            va="center",
         )
 
         buf = io.BytesIO()
-        fig.savefig(buf, format="png", dpi=140, facecolor=BG)
+        fig.savefig(buf, format="png", dpi=140, facecolor=BG_MAIN)
         plt.close(fig)
         buf.seek(0)
         return Image.open(buf).convert("RGB")
 
-    summary_img = draw_disc_frame(None)
-    frames = [draw_disc_frame(s) for s in (1, 2, 3, 4, 5)] + [summary_img, summary_img]
-    frames[0].save(
+    n_f = min(18, len(gif_frames)) if gif_frames else 6
+    frames_out = [draw_disc_frame(g_idx=k) for k in range(n_f)]
+    out_gif.parent.mkdir(parents=True, exist_ok=True)
+    frames_out[0].save(
         out_gif,
         save_all=True,
-        append_images=frames[1:],
-        duration=[900, 900, 900, 900, 900, 1400, 1400],
+        append_images=frames_out[1:],
+        duration=180,
         loop=0,
+        optimize=True,
     )
     print(f"Saved Loop 2 Discovery animated GIF to {out_gif}")
 
