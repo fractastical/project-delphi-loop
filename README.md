@@ -16,6 +16,9 @@ python3 run_loop.py
 
 # Loop 2: How we do scientific discovery from the Knowledge Graph (+58.7 dB, 3 Confirmed / 1 Falsified Horizon)
 python3 run_discovery_loop.py
+
+# Query the Knowledge Graph across all 4 Nanopubs + Lean 4 theorems to synthesize solutions to hard problems
+python3 query_kg_solver.py --mode solve
 ```
 
 ---
