@@ -1,0 +1,33 @@
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix pk: <https://w3id.org/delphi/ontology/> .
+@prefix pkr: <https://w3id.org/delphi/resource/> .
+@prefix sub: <https://w3id.org/delphi/np/discovery-preregistration/> .
+
+sub:Head {
+  <https://w3id.org/delphi/np/discovery-preregistration> a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  pkr:prereg-modular-allometry-horizon a pk:PreRegisteredPrediction ;
+    pk:lockedPredictionsFile "discovery/blind_predictions_locked.csv" ;
+    pk:lockedPredictionsSha256 "fd123b73f80583205a8f2c5c5e91c1239ad67996746fb27e5e64ccdeb5eb2215" ;
+    pk:predictedHorizonMyr "48.75"^^xsd:double ;
+    pk:registersHypothesis "H1_head_bias_seesaw", "H2_horizon_error_scaling", "H3_sympatric_head_acceleration", "H4_unbounded_17dot_null" ;
+    pk:blindedStatus "locked_prior_to_heldout_access" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo pkr:model-claude-fable-5-1 ;
+    prov:wasDerivedFrom <https://w3id.org/delphi/np/pass2-example-claim> ;
+    prov:wasDerivedFrom <file://discovery/ablation_and_hypotheses.json> .
+}
+
+sub:pubinfo {
+  <https://w3id.org/delphi/np/discovery-preregistration> npx:hasTrustyDigest "fd123b73f80583205a8f2c5c5e91c123" .
+}

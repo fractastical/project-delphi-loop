@@ -1,0 +1,39 @@
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix pk: <https://w3id.org/delphi/ontology/> .
+@prefix pkr: <https://w3id.org/delphi/resource/> .
+@prefix sub: <https://w3id.org/delphi/np/discovery-outcome-claim/> .
+
+sub:Head {
+  <https://w3id.org/delphi/np/discovery-outcome-claim> a np:Nanopublication ;
+    np:hasAssertion sub:assertion ;
+    np:hasProvenance sub:provenance ;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  pkr:discovery-two-rule-morphospace-synthesis a pk:DiscoveryClaim ;
+    pk:confirmedHypothesis
+      "H1: 9/17 head-landmark density bias degrades interfamily outlines (IoU 0.614 -> 0.562), whereas 600-pt direct outline fitting recovers 100% of pairs (mean IoU 0.760)" ,
+      "H2: Out-of-sample morphometric error scales linearly with phylogenetic divergence time tau (r = 0.9788, 95% PI coverage = 87.5%)" ,
+      "H3: Sympatric sister species accelerate craniofacial/jaw divergence 4.754x over body divergence" ;
+    pk:falsifiedHypothesis
+      "H4: Single 17-landmark global grid invariance above 50 Myr is FALSIFIED (drops from 100% below 50 Myr to 0.0% above 50 Myr)" ;
+    pk:discoveredRegimeBoundary "tau_star = 48.6 Myr (craniofacial vs. axial fin modularity horizon)" ;
+    pk:verifiedByLeanTheorem "ProjectDelphi.Discovery.nine_of_seventeen_head_bias_amplifies_posterior_error" ;
+    pk:weightOfEvidenceDecibans "58.68"^^xsd:double ;
+    pk:verdict "verified_discovery_with_domain_boundary" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo pkr:model-gemini-4-argon , pkr:model-claude-fable-5-1 ;
+    npx:evaluatesPreRegistration <https://w3id.org/delphi/np/discovery-preregistration> ;
+    prov:wasDerivedFrom <https://w3id.org/delphi/np/pass2-example-claim> ;
+    prov:wasDerivedFrom <file://kg/discovery_blind_sidecar.json> .
+}
+
+sub:pubinfo {
+  <https://w3id.org/delphi/np/discovery-outcome-claim> npx:hasTrustyDigest "e2c56a0f7a02bbd3d1f9927226d6dbf3" .
+}

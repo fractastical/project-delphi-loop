@@ -1,0 +1,45 @@
+{
+  "seeded_by_kg_claim": "https://w3id.org/delphi/np/pass2-example-claim",
+  "n_discovery_pairs": 16,
+  "four_way_deconfounding_ablation_interfamily": {
+    "mean_iou_unwarped_similarity": 0.6165,
+    "mean_iou_17dot_head_biased_seesaw": 0.5724,
+    "mean_iou_4p_box_stretch_homologous": 0.3702,
+    "mean_iou_600pt_direct_outline_warp": 0.7666,
+    "seesaw_degradation_17dot_vs_unwarped": -0.0441,
+    "true_warp_gain_over_4p_box": 0.3964
+  },
+  "ecological_modularity_ablation": {
+    "sympatric_head_to_body_rate_ratio": 4.777,
+    "allopatric_head_to_body_rate_ratio": 1.332,
+    "sympatric_acceleration_factor": 3.586
+  },
+  "calibrated_prediction_parameters": {
+    "outline_iou_slope_per_myr": -0.001566,
+    "outline_iou_intercept": 0.912663,
+    "estimated_modularity_horizon_tau_star_myr": 48.75,
+    "pi95_halfwidth_iou": 0.025
+  },
+  "synthesized_hypotheses": [
+    {
+      "id": "H1",
+      "title": "9/17 Head-Bias Seesaw Paradox & Direct 600-pt Outline Recovery",
+      "prediction": "On held-out interfamily pairs (tau >= 50 Myr), 17-dot head-biased fits degrade silhouette IoU below unwarped alignment, whereas 600-pt outline fits beat 17-dot fits on 100% of pairs."
+    },
+    {
+      "id": "H2",
+      "title": "Horizon-Calibrated Phylogenetic Decay Law",
+      "prediction": "Out-of-sample morphometric error scales monotonically with phylogenetic divergence time tau (Pearson r > 0.90), and >= 90% of held-out species fall inside the locked 95% prediction interval."
+    },
+    {
+      "id": "H3",
+      "title": "Sympatric Craniofacial Trophic Acceleration",
+      "prediction": "Sympatric sister pairs competing in the same habitat exhibit a head/body evolutionary rate ratio >= 3.5x (vs. < 1.5x in allopatric pairs)."
+    },
+    {
+      "id": "H4",
+      "title": "Unbounded Single-Grid Null Hypothesis (Domain-Boundary Test)",
+      "prediction": "Null claim that a single 17-landmark global grid stays within the intrageneric noise floor at ALL timescales tau > 50 Myr (expected to be FALSIFIED above tau* ~ 48.8 Myr)."
+    }
+  ]
+}

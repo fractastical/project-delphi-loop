@@ -1,0 +1,33 @@
+{
+  "preregistration_nanopub": "https://w3id.org/delphi/np/discovery-preregistration",
+  "locked_predictions_sha256": "fd123b73f80583205a8f2c5c5e91c1239ad67996746fb27e5e64ccdeb5eb2215",
+  "heldout_dataset_sha256": "3875abba0077cc8db7929184d300bafb9d6434ee1cfb2cd81ab2f3c64e6700d7",
+  "n_heldout_pairs": 16,
+  "hypothesis_outcomes": {
+    "H1_head_bias_seesaw_and_outline_recovery": {
+      "status": "CONFIRMED",
+      "interfamily_recovery_rate": 1.0,
+      "weight_of_evidence_db": 24.08
+    },
+    "H2_horizon_calibrated_error_scaling": {
+      "status": "CONFIRMED",
+      "pearson_r_error_vs_tau": 0.9788,
+      "pi95_empirical_coverage": 0.875,
+      "weight_of_evidence_db": 18.4
+    },
+    "H3_sympatric_craniofacial_acceleration": {
+      "status": "CONFIRMED",
+      "sympatric_head_body_ratio": 4.754,
+      "allopatric_head_body_ratio": 1.353,
+      "weight_of_evidence_db": 16.2
+    },
+    "H4_unbounded_17dot_single_grid_null": {
+      "status": "FALSIFIED",
+      "within_genus_floor_rate_below_50myr": 1.0,
+      "within_genus_floor_rate_above_50myr": 0.0,
+      "discovered_modularity_horizon_tau_star_myr": 48.6,
+      "scientific_meaning": "Single 17-landmark global grids hold below ~48.6 Myr (100%) but drop to 0.0% above 50 Myr as craniofacial and fin modules decouple."
+    }
+  },
+  "combined_weight_of_evidence_db": 58.68
+}

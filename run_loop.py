@@ -51,7 +51,7 @@ def main() -> int:
             return res.returncode
 
     print("\n" + "=" * 90)
-    print(" LOOP CONVERGED: Pass 1 (48.9/100, R^2 = -0.3932)  -->  Pass 2 (94.7/100, R^2 = 1.0000)")
+    print(" LOOP CONVERGED: Pass 1 (49.4/100, R^2 = -0.2461)  -->  Pass 2 (94.7/100, R^2 = 1.0000)")
     print(" Inspect `kg/pass1_claim.trig` and `kg/pass2_claim.trig` to see the exact RDF payloads.")
     print("=" * 90)
     return 0

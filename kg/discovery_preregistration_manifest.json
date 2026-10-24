@@ -1,0 +1,15 @@
+{
+  "preregistration_id": "https://w3id.org/delphi/np/discovery-preregistration",
+  "derived_from_kg_claim": "https://w3id.org/delphi/np/pass2-example-claim",
+  "locked_predictions_file": "discovery/blind_predictions_locked.csv",
+  "locked_predictions_sha256": "fd123b73f80583205a8f2c5c5e91c1239ad67996746fb27e5e64ccdeb5eb2215",
+  "n_locked_predictions": 16,
+  "estimated_modularity_horizon_tau_star_myr": 48.75,
+  "heldout_data_touched_during_preregistration": false,
+  "registered_hypotheses": [
+    "H1",
+    "H2",
+    "H3",
+    "H4"
+  ]
+}

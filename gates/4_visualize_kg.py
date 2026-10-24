@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 """
-gates/4_visualize_kg.py — Render the Project Delphi RDF Knowledge Graph &
-generate a self-contained interactive HTML Knowledge Graph Explorer.
+gates/4_visualize_kg.py — Render the Project Delphi RDF Knowledge Graph,
+the Loop 2 Scientific Discovery Architecture (PNG + animated GIF), and the
+self-contained interactive HTML Knowledge Graph Explorer (`kg/explore_kg.html`).
 
 Outputs:
   1. `media/delphi_knowledge_graph_network.png` — High-res dark-mode visual map
      of the RDF Knowledge Graph showing the 4 named graphs per Nanopub
      (`sub:Head`, `sub:assertion`, `sub:provenance`, `sub:pubinfo`), the
-     `pk:Claim` node, the 7 dimension score nodes (`pk:hasScore`), the
-     `pk:evidenceAgainst` remediation nodes, and the `npx:supersedes` edge
-     from Pass 2 (`94.7/100`) to Pass 1 (`49.4/100`).
-  2. `kg/explore_kg.html` — Interactive zero-dependency HTML/SVG Knowledge Graph
-     Explorer where any reviewer can click every RDF node/edge and inspect its
-     exact `.trig` triples, SHA-256 digests, and scores.
+     `pk:Claim` node, the `pk:evidenceAgainst` remediation nodes, the
+     `npx:supersedes` edge from Pass 2 (`94.7/100`) to Pass 1 (`49.4/100`), and
+     the Loop 2 Discovery Nanopubs (`discovery_preregistration.trig` ->
+     `discovery_outcome.trig`).
+  2. `media/delphi_discovery_loop.png` & `media/delphi_discovery_loop.gif` —
+     High-res dark-mode visual diagram and animated step-by-step GIF of Loop 2
+     ("How We Do Discovery from the Knowledge Graph").
+  3. `kg/explore_kg.html` — Interactive zero-dependency HTML/SVG Knowledge Graph
+     Explorer covering both Loop 1 (Making the KG) and Loop 2 (Discovery).
 """
 
 from __future__ import annotations
 
+import io
 import json
 from pathlib import Path
 import matplotlib
@@ -24,9 +29,12 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_PNG = ROOT / "media" / "delphi_knowledge_graph_network.png"
+OUT_DISC_PNG = ROOT / "media" / "delphi_discovery_loop.png"
+OUT_DISC_GIF = ROOT / "media" / "delphi_discovery_loop.gif"
 OUT_HTML = ROOT / "kg" / "explore_kg.html"
 
 
@@ -55,7 +63,6 @@ def draw_kg_node(
             zorder=3,
         )
     )
-    # Type pill
     ax.add_patch(
         FancyBboxPatch(
             (x + 0.5, y + h - 3.1),
@@ -92,8 +99,14 @@ def draw_kg_node(
         zorder=5,
     )
     for idx, ln in enumerate(lines):
-        col = "#3fb950" if "0.9470" in ln or "faithful" in ln or "1.000" in ln else (
-            "#f85149" if "evidenceAgainst" in ln or "-0.2461" in ln or "needs_remediation" in ln else "#c9d1d9"
+        col = (
+            "#3fb950"
+            if ("0.947" in ln or "faithful" in ln or "1.000" in ln or "CONFIRMED" in ln or "+58.7" in ln)
+            else (
+                "#f85149"
+                if ("evidenceAgainst" in ln or "-0.2461" in ln or "needs_remediation" in ln or "FALSIFIED" in ln)
+                else "#c9d1d9"
+            )
         )
         ax.text(
             x + 0.7,
@@ -164,7 +177,6 @@ def render_kg_png(out_png: Path):
     ax.set_ylim(0, 100)
     ax.axis("off")
 
-    # Outer border
     ax.add_patch(
         FancyBboxPatch(
             (1.2, 1.8),
@@ -178,30 +190,27 @@ def render_kg_png(out_png: Path):
         )
     )
 
-    # Header
     ax.text(
         2.2,
         96.2,
-        "Project Delphi RDF Knowledge Graph Topology & Nanopublication Contents (`kg/*.trig`)",
+        "Project Delphi RDF Knowledge Graph Topology — Loop 1 (Making the KG) & Loop 2 (Discovery)",
         color="#f0f6fc",
-        fontsize=14.0,
+        fontsize=13.8,
         fontweight="bold",
         va="center",
     )
     ax.text(
         2.2,
         92.3,
-        "Every Nanopublication contains 4 Named RDF Graphs (`sub:Head`, `sub:assertion`, `sub:provenance`, `sub:pubinfo`). "
-        "Pass 2 (`94.7/100`) links to Pass 1 (`49.4/100`) via `npx:supersedes` after resolving `pk:evidenceAgainst`.",
+        "Loop 1 (`pass1_claim.trig` -> `pass2_claim.trig`) builds & remediates the KG via `pk:evidenceAgainst`; "
+        "Loop 2 (`discovery_preregistration.trig` -> `discovery_outcome.trig`) pre-registers & tests new laws.",
         color=BLUE,
-        fontsize=8.6,
+        fontsize=8.5,
         fontweight="bold",
         va="center",
     )
 
-    # -------------------------------------------------------------------------
     # LEFT CONTAINER: Pass 1 Nanopublication (`kg/pass1_claim.trig`, 49.4/100)
-    # -------------------------------------------------------------------------
     ax.add_patch(
         FancyBboxPatch(
             (2.4, 30.0),
@@ -218,15 +227,14 @@ def render_kg_png(out_png: Path):
     ax.text(
         4.0,
         85.0,
-        " NANOPUB #1 — Pass 1 Checkpoint (`kg/pass1_claim.trig` · Score: 49.4/100 · Replaced)",
+        " NANOPUB #1 — Loop 1 Pass 1 (`kg/pass1_claim.trig` · Score: 49.4/100 · Superseded)",
         color=AMBER,
-        fontsize=8.8,
+        fontsize=8.6,
         fontweight="bold",
         family="monospace",
         va="center",
     )
 
-    # Node P1 Head & Pubinfo
     draw_kg_node(
         ax,
         4.0,
@@ -239,13 +247,12 @@ def render_kg_png(out_png: Path):
             "np:hasAssertion sub:assertion",
             "np:hasProvenance sub:provenance",
             "np:hasPublicationInfo sub:pubinfo",
-            "npx:hasTrustyDigest 'b883f259...'",
+            "npx:hasTrustyDigest 'abd43982...'",
         ],
         AMBER,
         "#7c2d12",
     )
 
-    # Node P1 Provenance & Sidecar
     draw_kg_node(
         ax,
         25.2,
@@ -264,7 +271,6 @@ def render_kg_png(out_png: Path):
         "#1e3a8a",
     )
 
-    # Node P1 Assertion (`pk:Claim` + `pk:LLMClaimAssessment`)
     draw_kg_node(
         ax,
         4.0,
@@ -275,7 +281,7 @@ def render_kg_png(out_png: Path):
         "pkr:claim-example-allometry (Pass 1 v1)",
         [
             'pk:targetScript "example/pass1_naive_fit.py" ;',
-            'pk:measuredR2 "-0.246056"^^xsd:double ; pk:measuredRMSE "44.2323"^^xsd:double ;',
+            'pk:measuredR2 "-0.246106"^^xsd:double ; pk:measuredRMSE "44.2323"^^xsd:double ;',
             'pk:hasScore "0.4940"^^xsd:double ; pk:verdict "needs_remediation" ;',
             "Dimension Scores: fidelity=35, match=20, param=40, quant=50, data=95, code=70, repro=90",
         ],
@@ -283,7 +289,6 @@ def render_kg_png(out_png: Path):
         "#9a3412",
     )
 
-    # Node P1 `pk:evidenceAgainst` (The Trigger!)
     draw_kg_node(
         ax,
         4.0,
@@ -301,14 +306,11 @@ def render_kg_png(out_png: Path):
         "#991b1b",
     )
 
-    # Internal edges in Pass 1
     draw_predicate_edge(ax, (13.7, 66.0), (13.7, 63.5), "np:hasAssertion", AMBER, ly=0.2)
     draw_predicate_edge(ax, (35.0, 66.0), (35.0, 63.5), "prov:wasDerivedFrom", BLUE, ly=0.2)
     draw_predicate_edge(ax, (24.4, 47.0), (24.4, 45.0), "pk:evidenceAgainst", RED, ly=0.1)
 
-    # -------------------------------------------------------------------------
     # RIGHT CONTAINER: Pass 2 Nanopublication (`kg/pass2_claim.trig`, 94.7/100)
-    # -------------------------------------------------------------------------
     ax.add_patch(
         FancyBboxPatch(
             (53.6, 30.0),
@@ -324,15 +326,14 @@ def render_kg_png(out_png: Path):
     ax.text(
         55.2,
         85.0,
-        " NANOPUB #2 — Pass 2 Active Head (`kg/pass2_claim.trig` · Score: 94.7/100 · Faithful)",
+        " NANOPUB #2 — Loop 1 Pass 2 Head (`kg/pass2_claim.trig` · Score: 94.7/100 · Faithful)",
         color=GREEN,
-        fontsize=8.8,
+        fontsize=8.6,
         fontweight="bold",
         family="monospace",
         va="center",
     )
 
-    # Node P2 Head & Pubinfo
     draw_kg_node(
         ax,
         55.2,
@@ -345,13 +346,12 @@ def render_kg_png(out_png: Path):
             "npx:supersedes pass1-example-claim",
             "np:hasAssertion sub:assertion",
             "np:hasProvenance sub:provenance",
-            "npx:hasTrustyDigest 'f192da5e...'",
+            "npx:hasTrustyDigest '6bae1985...'",
         ],
         GREEN,
         "#14532d",
     )
 
-    # Node P2 Provenance & Sidecar
     draw_kg_node(
         ax,
         76.4,
@@ -370,7 +370,6 @@ def render_kg_png(out_png: Path):
         "#1e3a8a",
     )
 
-    # Node P2 Assertion
     draw_kg_node(
         ax,
         55.2,
@@ -382,38 +381,34 @@ def render_kg_png(out_png: Path):
         [
             'pk:targetScript "example/pass2_remediated_fit.py" ;',
             'pk:measuredR2 "1.000000"^^xsd:double ; pk:measuredRMSE "0.0227"^^xsd:double ;',
-            'pk:hasScore "0.9470"^^xsd:double ; pk:verdict "faithful" ;',
+            'pk:hasScore "0.9471"^^xsd:double ; pk:verdict "faithful" ;',
             "Dimension Scores: fidelity=95, match=96, param=92, quant=95, data=95, code=92, repro=95",
         ],
         GREEN,
         "#15803d",
     )
 
-    # Node P2 Convergence Verification
     draw_kg_node(
         ax,
         55.2,
         31.8,
         40.8,
         13.2,
-        "Gate 1 + Gate 2 + Gate 3 Verification Summary",
-        "0 `pk:evidenceAgainst` Triples Remaining -> Loop Converged",
+        "Gate 4a Anomaly Seed -> Triggers Loop 2 (`run_discovery_loop.py`)",
+        "Exponent Gap Discovered in KG: b_head = 1.995 vs. b_body = 3.001",
         [
-            "• Lean 4 Theorem: `ProjectDelphi.Example.unit_length_recovers_prefactor` (0 sorry)",
-            "• Fitted Exponents: b_head = 1.9954 (area) | b_body = 3.0005 (volume)",
-            "• Version Chain: Nanopub #2 supersedes Nanopub #1 (Pass 1 remains immutable on record)",
+            "• Why does fitting head-heavy landmarks degrade whole-body outlines?",
+            "• Seeds `discovery/discovery_law.lean` (0 sorry) + 4-way deconfounding ablation",
+            "• Links directly to Nanopub #3 (`discovery_preregistration.trig`) & #4 (`discovery_outcome.trig`)",
         ],
         PURPLE,
         "#581c87",
     )
 
-    # Internal edges in Pass 2
     draw_predicate_edge(ax, (64.9, 66.0), (64.9, 63.5), "np:hasAssertion", GREEN, ly=0.2)
     draw_predicate_edge(ax, (86.2, 66.0), (86.2, 63.5), "prov:wasDerivedFrom", BLUE, ly=0.2)
-    draw_predicate_edge(ax, (75.6, 47.0), (75.6, 45.0), "pk:verifiedBy", PURPLE, ly=0.1)
+    draw_predicate_edge(ax, (75.6, 47.0), (75.6, 45.0), "gates/5_query_kg", PURPLE, ly=0.1)
 
-    # Cross-Nanopub edges:
-    # 1. `npx:supersedes` from Pass 2 Head -> Pass 1 Head
     draw_predicate_edge(
         ax,
         (55.2, 74.2),
@@ -424,7 +419,6 @@ def render_kg_png(out_png: Path):
         ly=4.2,
     )
 
-    # 2. `pk:evidenceAgainst` -> Prompt 3 -> Pass 2 Script
     draw_predicate_edge(
         ax,
         (44.8, 38.4),
@@ -437,9 +431,7 @@ def render_kg_png(out_png: Path):
         ly=-2.2,
     )
 
-    # -------------------------------------------------------------------------
-    # BOTTOM BAND: Real-World Production Scale in Thompson 1917 Study (80 Nanopubs)
-    # -------------------------------------------------------------------------
+    # BOTTOM BAND: Loop 2 Nanopubs (#3 Pre-Registration & #4 Discovery Outcome) + Production Scale
     ax.add_patch(
         FancyBboxPatch(
             (2.4, 3.6),
@@ -455,41 +447,41 @@ def render_kg_png(out_png: Path):
     ax.text(
         4.0,
         25.0,
-        "HOW THIS EXACT RDF GRAPH SCALES IN THE FULL D'ARCY THOMPSON (1917) PRODUCTION GRAPH (80 SIGNED NANOPUBLICATIONS)",
+        "LOOP 2 DISCOVERY NANOPUBLICATIONS (`kg/discovery_*.trig`) & REAL-WORLD PRODUCTION SCALE (80 SIGNED NANOPUBS)",
         color="#f0f6fc",
-        fontsize=8.9,
+        fontsize=8.8,
         fontweight="bold",
         va="center",
     )
 
     prod_batches = [
         (
-            "Batch 1: MorphoEval Audits",
-            "17 Signed Nanopubs",
+            "Nanopub #3: Blind Preregistration",
+            "kg/discovery_preregistration.trig",
+            "delphi:np/discovery-preregistration",
+            "• Locks 16 out-of-sample predictions\n• SHA-256 `fd123b73f805...` pinned\n  BEFORE unblinding `heldout_blind_species.csv`",
+            AMBER,
+        ),
+        (
+            "Nanopub #4: Discovery Outcome",
+            "kg/discovery_outcome.trig",
+            "delphi:np/discovery-outcome-claim",
+            "• `npx:evaluatesPreRegistration` -> #3\n• CONFIRMED: H1, H2, H3 (+58.7 dB)\n• FALSIFIED: H4 > 48.6 Myr Horizon",
+            GREEN,
+        ),
+        (
+            "Thompson 1917 Production Audit",
+            "17 Signed Audit Nanopubs",
             "RAYFKAfyOnqIKXWzdEzCN...",
             "• 9 Primary (`claude-fable-5-1`: 76.6)\n• 8 Blinded (`gemini-4-argon`: 90.8)\n• `pk:evidenceAgainst` sparked 600-pt fit",
             BLUE,
         ),
         (
-            "Batch 2: Ancestral & Fossil Claims",
-            "68 Signed Nanopubs",
-            "np_thompson_pred-*",
-            "• 36 Crown-Family Ancestral States\n• 6 MRCA Pairs (1917 Classics)\n• 15 Monte Bolca (50 Ma) + 10 Fossils",
+            "FishShapes v1 + 15-Clade Portfolio",
+            "90+ Production Nanopubs",
+            "RAilN4nb... -> RAJancw...",
+            "• 10,888 species locked before download\n• 5,180 blind species (`p = 10^-103`)\n• 15-Clade Cross-Kingdom GM Portfolio",
             PURPLE,
-        ),
-        (
-            "Batch 3: Blind Preregistration Lock",
-            "1 Signed Nanopub (Locked)",
-            "RAilN4nbRHp3e3ZHqlbIge...",
-            "• Locks 10,888 species predictions\n• SHA-256 `1d50205ffc2e...` pinned\n  BEFORE FishShapes v1 download",
-            AMBER,
-        ),
-        (
-            "Batch 4: Unblinded Test & Portfolio",
-            "2 Signed Nanopubs",
-            "RAJancw... & RA9ZKlSD...",
-            "• Links to `RAilN4nb` (`prov:wasDerivedFrom`)\n• 5,180 blind species (`p = 10^-103`)\n• 14-Dataset Weekly CI Portfolio",
-            GREEN,
         ),
     ]
 
@@ -509,8 +501,8 @@ def render_kg_png(out_png: Path):
             )
         )
         ax.text(bx + 0.8, 20.6, btitle, color="#f0f6fc", fontsize=7.6, fontweight="bold", va="center", zorder=4)
-        ax.text(bx + 0.8, 18.2, bcount, color=bcol, fontsize=7.3, fontweight="bold", va="center", zorder=4)
-        ax.text(bx + 0.8, 15.9, buri, color=BLUE, fontsize=6.6, family="monospace", va="center", zorder=4)
+        ax.text(bx + 0.8, 18.2, bcount, color=bcol, fontsize=7.2, fontweight="bold", va="center", zorder=4)
+        ax.text(bx + 0.8, 15.9, buri, color=BLUE, fontsize=6.5, family="monospace", va="center", zorder=4)
         ax.text(bx + 0.8, 10.2, bdesc, color="#c9d1d9", fontsize=6.6, linespacing=1.28, va="center", zorder=4)
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -519,18 +511,257 @@ def render_kg_png(out_png: Path):
     print(f"Saved Knowledge Graph visual map to {out_png}")
 
 
+def render_discovery_loop_diagram(out_png: Path, out_gif: Path):
+    BG = "#0d1117"
+    CARD = "#161b22"
+    ACTIVE_BG = "#1e293b"
+    STROKE = "#30363d"
+    BLUE = "#58a6ff"
+    GREEN = "#3fb950"
+    AMBER = "#d29922"
+    RED = "#f85149"
+    PURPLE = "#bc8cff"
+
+    STEPS = [
+        (
+            1,
+            "STEP D1 — Query Loop 1 KG & Pin Lean 4 Laws",
+            "Gate 4a: `gates/5_query_kg_for_discovery.py`",
+            BLUE,
+            (4.0, 56.0, 28.0, 27.0),
+            [
+                "• Reads `kg/pass1_claim.trig` & `kg/pass2_claim.trig`",
+                "• Extracts exponent gap: b_head=2.0 vs b_body=3.0",
+                "• Verifies `discovery/discovery_law.lean` (0 sorry)",
+                "• Verifies `landmark_vs_outline_data.csv` SHA-256",
+                "• Emits `kg/discovery_anomaly_query.json`",
+            ],
+        ),
+        (
+            2,
+            "STEP D2 — 4-Way Ablation & Hypothesis Synthesis",
+            "Agent: `discovery/1_synthesize_hypotheses.py` (Prompt 4)",
+            PURPLE,
+            (36.0, 56.0, 28.0, 27.0),
+            [
+                "• Ablation 1: 17-Dot Head Seesaw degrades IoU",
+                "  (0.616 -> 0.572) vs 600-pt Outline (0.767)",
+                "• Ablation 2: 4p Box (0.370) vs True Warp (+0.396)",
+                "• Ablation 3: Sympatric Head/Body Rate = 4.78x",
+                "• Synthesizes falsifiable H1, H2, H3, and null H4",
+            ],
+        ),
+        (
+            3,
+            "STEP D3 — Cryptographic Blind Pre-Registration",
+            "Agent: `discovery/2_preregister_blind_predictions.py` (Prompt 5)",
+            AMBER,
+            (68.0, 56.0, 28.0, 27.0),
+            [
+                "• STRICT BLINDING: Never touches held-out data!",
+                "• Writes `discovery/blind_predictions_locked.csv`",
+                "• Computes SHA-256 lock `fd123b73f8058320...`",
+                "• Emits Nanopub #3: `discovery_preregistration.trig`",
+                "• Linked via `prov:wasDerivedFrom` -> Pass 2 KG",
+            ],
+        ),
+        (
+            4,
+            "STEP D4 — Zero-LLM Blind Unblinding & Falsification",
+            "Gate 4b: `gates/6_score_blind_discovery.py`",
+            RED,
+            (18.0, 12.0, 31.0, 29.0),
+            [
+                "• Verifies SHA-256 of locked predictions BEFORE",
+                "  unblinding `discovery/heldout_blind_species.csv`",
+                "• H1 (Outline Recovery 8/8): CONFIRMED (+24.1 dB)",
+                "• H2 (Error vs tau r=0.979): CONFIRMED (+18.4 dB)",
+                "• H3 (Sympatric 4.75x Jaw): CONFIRMED (+16.2 dB)",
+                "• H4 (>50 Myr 17-Dot Grid): FALSIFIED (tau*=48.6 Myr)",
+            ],
+        ),
+        (
+            5,
+            "STEP D5 — Discovery Outcome Nanopub & KG Update",
+            "Gate 5: `gates/7_compile_discovery_kg.py` (Prompt 6)",
+            GREEN,
+            (54.0, 12.0, 34.0, 29.0),
+            [
+                "• Emits Nanopub #4: `kg/discovery_outcome.trig`",
+                "• Predicate `npx:evaluatesPreRegistration` -> #3",
+                "• Records 3 Confirmed Laws (`+58.7 dB` combined)",
+                "• Records Honest Falsification of H4 (`tau* = 48.6 Myr`)",
+                "• Updates Knowledge Graph with domain boundary!",
+            ],
+        ),
+    ]
+
+    def draw_disc_frame(active_step: int | None = None) -> Image.Image:
+        fig, ax = plt.subplots(figsize=(14.5, 8.6), dpi=140, facecolor=BG)
+        fig.subplots_adjust(0, 0, 1, 1)
+        ax.set_facecolor(BG)
+        ax.set_xlim(0, 100)
+        ax.set_ylim(0, 100)
+        ax.axis("off")
+
+        ax.add_patch(
+            FancyBboxPatch(
+                (1.2, 2.0),
+                97.6,
+                87.0,
+                boxstyle="round,pad=0.3,rounding_size=1.4",
+                fc=BG,
+                ec=STROKE,
+                lw=1.2,
+                zorder=1,
+            )
+        )
+
+        ax.text(
+            2.2,
+            95.5,
+            "Project Delphi Loop 2 — Knowledge-Graph-Driven Scientific Discovery & Blind Pre-Registration",
+            color="#f0f6fc",
+            fontsize=13.5,
+            fontweight="bold",
+            va="center",
+        )
+        ax.text(
+            2.2,
+            91.4,
+            "Starts from Loop 1 KG (`kg/pass2_claim.trig`) -> Synthesizes Deconfounded Hypotheses + Lean 4 Proofs -> "
+            "Locks Pre-Registration SHA-256 BEFORE Unblinding -> Scores Held-Out Data (+58.7 dB)",
+            color=GREEN if active_step in (None, 5) else BLUE,
+            fontsize=8.5,
+            fontweight="bold",
+            va="center",
+        )
+
+        for snum, stitle, sgate, scol, (x, y, w, h), lines in STEPS:
+            is_act = active_step == snum
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x, y),
+                    w,
+                    h,
+                    boxstyle="round,pad=0.22,rounding_size=1.0",
+                    fc=ACTIVE_BG if is_act else CARD,
+                    ec=scol if (is_act or active_step is None) else STROKE,
+                    lw=2.5 if is_act else 1.5,
+                    zorder=3,
+                )
+            )
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x + 0.6, y + h - 3.6),
+                    w - 1.2,
+                    2.8,
+                    boxstyle="round,pad=0.08,rounding_size=0.45",
+                    fc=scol,
+                    ec="none",
+                    zorder=4,
+                )
+            )
+            ax.text(
+                x + w / 2,
+                y + h - 2.2,
+                stitle,
+                color="#0d1117" if scol in (GREEN, AMBER, BLUE) else "#f0f6fc",
+                fontsize=8.0,
+                fontweight="bold",
+                family="monospace",
+                ha="center",
+                va="center",
+                zorder=5,
+            )
+            ax.text(
+                x + 0.8,
+                y + h - 6.0,
+                sgate,
+                color=scol,
+                fontsize=7.3,
+                fontweight="bold",
+                family="monospace",
+                va="center",
+                zorder=5,
+            )
+            for idx, ln in enumerate(lines):
+                lcol = (
+                    GREEN
+                    if ("CONFIRMED" in ln or "+58.7" in ln or "0 sorry" in ln)
+                    else (RED if "FALSIFIED" in ln or "degrades" in ln else "#c9d1d9")
+                )
+                ax.text(
+                    x + 0.8,
+                    y + h - 9.4 - idx * 3.1,
+                    ln,
+                    color=lcol,
+                    fontsize=7.1,
+                    family="monospace",
+                    va="center",
+                    zorder=5,
+                )
+
+        # Arrows connecting the 5 steps + closed feedback to KG
+        draw_predicate_edge(ax, (32.0, 69.5), (36.0, 69.5), "E7: Anomaly\n+ Lean 4", BLUE, ly=3.5)
+        draw_predicate_edge(ax, (64.0, 69.5), (68.0, 69.5), "E8: H1..H4\nAblations", PURPLE, ly=3.5)
+        draw_predicate_edge(
+            ax,
+            (82.0, 56.0),
+            (33.5, 41.0),
+            "E9: SHA-256 Locked Nanopub #3 (`discovery_preregistration.trig`)",
+            AMBER,
+            rad=-0.12,
+            ly=2.2,
+        )
+        draw_predicate_edge(ax, (49.0, 26.5), (54.0, 26.5), "E10: Blind\nSidecar", RED, ly=3.8)
+        draw_predicate_edge(
+            ax,
+            (54.0, 16.0),
+            (12.0, 56.0),
+            "E11: Updates KG with Confirmed Laws (+58.7 dB) & Honest Domain Boundary (tau* = 48.6 Myr)",
+            GREEN,
+            rad=-0.22,
+            ls="--",
+            ly=-4.2,
+        )
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=140, facecolor=BG)
+        plt.close(fig)
+        buf.seek(0)
+        return Image.open(buf).convert("RGB")
+
+    summary_img = draw_disc_frame(None)
+    summary_img.save(out_png)
+    print(f"Saved Loop 2 Discovery diagram to {out_png}")
+
+    frames = [draw_disc_frame(s) for s in (1, 2, 3, 4, 5)] + [summary_img, summary_img]
+    frames[0].save(
+        out_gif,
+        save_all=True,
+        append_images=frames[1:],
+        duration=[900, 900, 900, 900, 900, 1400, 1400],
+        loop=0,
+    )
+    print(f"Saved Loop 2 Discovery animated GIF to {out_gif}")
+
+
 def build_interactive_html(out_html: Path):
     p1_trig = (ROOT / "kg" / "pass1_claim.trig").read_text(encoding="utf-8")
     p2_trig = (ROOT / "kg" / "pass2_claim.trig").read_text(encoding="utf-8")
     p1_sidecar = (ROOT / "kg" / "pass1_sidecar.json").read_text(encoding="utf-8")
     p2_sidecar = (ROOT / "kg" / "pass2_sidecar.json").read_text(encoding="utf-8")
+    prereg_trig = (ROOT / "kg" / "discovery_preregistration.trig").read_text(encoding="utf-8")
+    disc_trig = (ROOT / "kg" / "discovery_outcome.trig").read_text(encoding="utf-8")
+    disc_sidecar = (ROOT / "kg" / "discovery_blind_sidecar.json").read_text(encoding="utf-8")
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Project Delphi — Interactive RDF Knowledge Graph & Nanopub Explorer</title>
+<title>Project Delphi — Interactive RDF Knowledge Graph & Discovery Explorer</title>
 <style>
   :root {{
     --bg: #0d1117;
@@ -583,14 +814,6 @@ def build_interactive_html(out_html: Path):
     color: #e6edf3;
     margin: 8px 0 0 0;
   }}
-  .badge {{
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: monospace;
-  }}
   .tabs {{ display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }}
   .tab {{
     background: var(--elev);
@@ -605,15 +828,15 @@ def build_interactive_html(out_html: Path):
 </style>
 </head>
 <body>
-  <h1>Project Delphi — Interactive RDF Knowledge Graph & Nanopub Explorer</h1>
+  <h1>Project Delphi — Interactive RDF Knowledge Graph & Discovery Explorer</h1>
   <div class="subtitle">
-    Click any RDF node in the graph below to inspect its exact triples, cryptographic SHA-256 locks, and how
-    <code>pk:evidenceAgainst</code> drives the closed remediation loop from Pass 1 (49.4/100) to Pass 2 (94.7/100).
+    Click any RDF Nanopublication node across <b>Loop 1 (Making the Knowledge Graph)</b> and
+    <b>Loop 2 (Scientific Discovery &amp; Blind Pre-Registration)</b> to inspect its exact <code>.trig</code> triples and sidecar JSON payloads.
   </div>
 
   <div class="layout">
     <div class="panel">
-      <svg viewBox="0 0 820 500" width="100%" style="background:#090d13;border-radius:8px;border:1px solid #30363d;">
+      <svg viewBox="0 0 820 620" width="100%" style="background:#090d13;border-radius:8px;border:1px solid #30363d;">
         <defs>
           <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#3fb950"/>
@@ -624,71 +847,104 @@ def build_interactive_html(out_html: Path):
           <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
           </marker>
+          <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#d29922"/>
+          </marker>
         </defs>
 
-        <!-- Edges -->
-        <path d="M 520 75 Q 395 25 270 75" fill="none" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrow-green)"/>
-        <text x="395" y="38" fill="#3fb950" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">npx:supersedes</text>
+        <!-- Loop 1 Header -->
+        <text x="25" y="26" fill="#58a6ff" font-size="12" font-family="monospace" font-weight="bold">LOOP 1: MAKING &amp; REMEDIATING THE KNOWLEDGE GRAPH (`python3 run_loop.py`)</text>
 
-        <line x1="155" y1="115" x2="155" y2="180" stroke="#d29922" stroke-width="2" marker-end="url(#arrow-blue)"/>
-        <text x="155" y="152" fill="#8b949e" font-size="10" font-family="monospace" text-anchor="middle">np:hasAssertion</text>
+        <!-- Edges Loop 1 -->
+        <path d="M 520 75 Q 395 30 270 75" fill="none" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+        <text x="395" y="42" fill="#3fb950" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">npx:supersedes</text>
 
-        <line x1="155" y1="265" x2="155" y2="345" stroke="#f85149" stroke-width="2.2" marker-end="url(#arrow-red)"/>
-        <text x="155" y="310" fill="#f85149" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">pk:evidenceAgainst (2)</text>
+        <line x1="155" y1="115" x2="155" y2="170" stroke="#d29922" stroke-width="2" marker-end="url(#arrow-blue)"/>
+        <line x1="155" y1="255" x2="155" y2="315" stroke="#f85149" stroke-width="2.2" marker-end="url(#arrow-red)"/>
+        <text x="155" y="290" fill="#f85149" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">pk:evidenceAgainst (2)</text>
 
-        <path d="M 290 385 Q 410 385 520 235" fill="none" stroke="#f85149" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#arrow-red)"/>
-        <text x="415" y="340" fill="#f85149" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">Prompt 3 resolves</text>
+        <path d="M 290 355 Q 410 355 520 215" fill="none" stroke="#f85149" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#arrow-red)"/>
+        <text x="415" y="315" fill="#f85149" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">Prompt 3 resolves</text>
 
-        <line x1="645" y1="115" x2="645" y2="180" stroke="#3fb950" stroke-width="2" marker-end="url(#arrow-green)"/>
-        <text x="645" y="152" fill="#8b949e" font-size="10" font-family="monospace" text-anchor="middle">np:hasAssertion</text>
-
-        <line x1="645" y1="265" x2="645" y2="345" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)"/>
-        <text x="645" y="310" fill="#58a6ff" font-size="10" font-family="monospace" text-anchor="middle">prov:wasDerivedFrom</text>
+        <line x1="645" y1="115" x2="645" y2="170" stroke="#3fb950" stroke-width="2" marker-end="url(#arrow-green)"/>
+        <line x1="645" y1="255" x2="645" y2="315" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)"/>
 
         <!-- Node 1: Pass 1 Head -->
         <g class="node-btn" onclick="selectNode('p1_head')">
           <rect x="40" y="45" width="230" height="70" rx="8" fill="#161b22" stroke="#d29922" stroke-width="2"/>
-          <text x="155" y="70" fill="#d29922" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">np:Nanopublication (Pass 1)</text>
+          <text x="155" y="70" fill="#d29922" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Nanopub #1 (Pass 1)</text>
           <text x="155" y="92" fill="#f0f6fc" font-size="11" font-family="monospace" text-anchor="middle">delphi:np/pass1-example-claim</text>
         </g>
 
         <!-- Node 2: Pass 1 Assertion -->
         <g class="node-btn" onclick="selectNode('p1_assertion')">
-          <rect x="40" y="180" width="230" height="85" rx="8" fill="#161b22" stroke="#d29922" stroke-width="2"/>
-          <text x="155" y="205" fill="#f0f6fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:Claim (Pass 1 v1)</text>
-          <text x="155" y="226" fill="#f85149" font-size="11" font-family="monospace" text-anchor="middle">pk:hasScore "0.4940" (49.4/100)</text>
-          <text x="155" y="246" fill="#8b949e" font-size="11" font-family="monospace" text-anchor="middle">R² = -0.2461 | RMSE = 44.23g</text>
+          <rect x="40" y="170" width="230" height="85" rx="8" fill="#161b22" stroke="#d29922" stroke-width="2"/>
+          <text x="155" y="195" fill="#f0f6fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:Claim (Pass 1 v1)</text>
+          <text x="155" y="216" fill="#f85149" font-size="11" font-family="monospace" text-anchor="middle">pk:hasScore "0.4940" (49.4/100)</text>
+          <text x="155" y="236" fill="#8b949e" font-size="11" font-family="monospace" text-anchor="middle">R² = -0.2461 | RMSE = 44.23g</text>
         </g>
 
         <!-- Node 3: Pass 1 evidenceAgainst -->
         <g class="node-btn" onclick="selectNode('p1_remediation')">
-          <rect x="25" y="345" width="265" height="90" rx="8" fill="#2a1215" stroke="#f85149" stroke-width="2.2"/>
-          <text x="157" y="370" fill="#f85149" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:evidenceAgainst (Trigger)</text>
-          <text x="157" y="392" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">1. Fit power law y=a*x^b on all 12 rows</text>
-          <text x="157" y="412" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">2. Report b_head &amp; b_body (R² &gt; 0.99)</text>
+          <rect x="25" y="315" width="265" height="80" rx="8" fill="#2a1215" stroke="#f85149" stroke-width="2.2"/>
+          <text x="157" y="340" fill="#f85149" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:evidenceAgainst (Trigger)</text>
+          <text x="157" y="362" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">1. Fit power law y=a*x^b on all 12 rows</text>
+          <text x="157" y="380" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">2. Report b_head &amp; b_body (R² &gt; 0.99)</text>
         </g>
 
         <!-- Node 4: Pass 2 Head -->
         <g class="node-btn" onclick="selectNode('p2_head')">
           <rect x="520" y="45" width="250" height="70" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="2.2"/>
-          <text x="645" y="70" fill="#3fb950" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">np:Nanopublication (Pass 2 Head)</text>
+          <text x="645" y="70" fill="#3fb950" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Nanopub #2 (Pass 2 Head)</text>
           <text x="645" y="92" fill="#f0f6fc" font-size="11" font-family="monospace" text-anchor="middle">delphi:np/pass2-example-claim</text>
         </g>
 
         <!-- Node 5: Pass 2 Assertion -->
         <g class="node-btn" onclick="selectNode('p2_assertion')">
-          <rect x="520" y="180" width="250" height="85" rx="8" fill="#12261e" stroke="#3fb950" stroke-width="2.2"/>
-          <text x="645" y="205" fill="#f0f6fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:Claim (Pass 2 Remediated)</text>
-          <text x="645" y="226" fill="#3fb950" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">pk:hasScore "0.9470" (94.7/100)</text>
-          <text x="645" y="246" fill="#c9d1d9" font-size="11" font-family="monospace" text-anchor="middle">R² = 1.0000 | RMSE = 0.0227g</text>
+          <rect x="520" y="170" width="250" height="85" rx="8" fill="#12261e" stroke="#3fb950" stroke-width="2.2"/>
+          <text x="645" y="195" fill="#f0f6fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:Claim (Pass 2 Remediated)</text>
+          <text x="645" y="216" fill="#3fb950" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">pk:hasScore "0.9471" (94.7/100)</text>
+          <text x="645" y="236" fill="#c9d1d9" font-size="11" font-family="monospace" text-anchor="middle">R² = 1.0000 | RMSE = 0.0227g</text>
         </g>
 
-        <!-- Node 6: Pass 2 Sidecar & Provenance -->
+        <!-- Node 6: Pass 2 Sidecar -->
         <g class="node-btn" onclick="selectNode('p2_sidecar')">
-          <rect x="520" y="345" width="250" height="90" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
-          <text x="645" y="370" fill="#58a6ff" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">sub:provenance &amp; Sidecar Gate 2</text>
-          <text x="645" y="392" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">SHA-256: ddb638b2e99b...</text>
-          <text x="645" y="412" fill="#3fb950" font-size="10.5" font-family="monospace" text-anchor="middle">0 pk:evidenceAgainst remaining</text>
+          <rect x="520" y="315" width="250" height="80" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+          <text x="645" y="340" fill="#58a6ff" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Gate 2 Sidecar &amp; Anomaly Seed</text>
+          <text x="645" y="362" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">b_head = 2.00 vs b_body = 3.00</text>
+          <text x="645" y="380" fill="#bc8cff" font-size="10.5" font-family="monospace" text-anchor="middle">Seeds Loop 2 Discovery Query!</text>
+        </g>
+
+        <!-- Divider -->
+        <line x1="20" y1="420" x2="800" y2="420" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="25" y="445" fill="#bc8cff" font-size="12" font-family="monospace" font-weight="bold">LOOP 2: SCIENTIFIC DISCOVERY &amp; BLIND PRE-REGISTRATION (`python3 run_discovery_loop.py`)</text>
+
+        <!-- Edge from Pass 2 to Nanopub #3 -->
+        <path d="M 520 385 Q 340 435 200 470" fill="none" stroke="#d29922" stroke-width="2.2" marker-end="url(#arrow-amber)"/>
+        <text x="360" y="460" fill="#d29922" font-size="10.5" font-family="monospace" font-weight="bold" text-anchor="middle">prov:wasDerivedFrom + SHA-256 Lock</text>
+
+        <!-- Node 7: Nanopub #3 Pre-Registration -->
+        <g class="node-btn" onclick="selectNode('disc_prereg')">
+          <rect x="25" y="470" width="330" height="125" rx="8" fill="#1f1a10" stroke="#d29922" stroke-width="2.2"/>
+          <text x="190" y="495" fill="#d29922" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Nanopub #3: pk:PreRegisteredPrediction</text>
+          <text x="190" y="516" fill="#f0f6fc" font-size="11" font-family="monospace" text-anchor="middle">delphi:np/discovery-preregistration</text>
+          <text x="190" y="538" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">SHA-256: fd123b73f8058320... (Locked BEFORE unblinding)</text>
+          <text x="190" y="558" fill="#3fb950" font-size="10.5" font-family="monospace" text-anchor="middle">Registers H1, H2, H3, H4 + tau* = 48.8 Myr</text>
+          <text x="190" y="578" fill="#58a6ff" font-size="10.5" font-family="monospace" text-anchor="middle">Lean 4: discovery/discovery_law.lean (0 sorry)</text>
+        </g>
+
+        <!-- Edge from Nanopub #3 to Nanopub #4 -->
+        <line x1="355" y1="532" x2="465" y2="532" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+        <text x="410" y="518" fill="#3fb950" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">Gate 4b Unblinds</text>
+
+        <!-- Node 8: Nanopub #4 Discovery Outcome -->
+        <g class="node-btn" onclick="selectNode('disc_outcome')">
+          <rect x="465" y="470" width="330" height="125" rx="8" fill="#12261e" stroke="#3fb950" stroke-width="2.2"/>
+          <text x="630" y="495" fill="#3fb950" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Nanopub #4: pk:DiscoveryClaim (+58.7 dB)</text>
+          <text x="630" y="516" fill="#f0f6fc" font-size="11" font-family="monospace" text-anchor="middle">delphi:np/discovery-outcome-claim</text>
+          <text x="630" y="538" fill="#3fb950" font-size="10.5" font-family="monospace" text-anchor="middle">CONFIRMED: H1 (8/8), H2 (r=0.979), H3 (4.75x Jaw)</text>
+          <text x="630" y="558" fill="#f85149" font-size="10.5" font-family="monospace" text-anchor="middle">FALSIFIED: H4 &gt; 50 Myr (Horizon tau* = 48.6 Myr)</text>
+          <text x="630" y="578" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">npx:evaluatesPreRegistration -&gt; Nanopub #3</text>
         </g>
       </svg>
     </div>
@@ -698,14 +954,15 @@ def build_interactive_html(out_html: Path):
         Click any node in the RDF graph to inspect its contents
       </div>
       <div id="node-desc" style="font-size:13px;color:var(--muted);margin-top:6px;">
-        Showing exact RDF TriG (`kg/pass1_claim.trig` & `kg/pass2_claim.trig`) and Gate 2 sidecar JSON payloads.
+        Inspect exact RDF TriG and zero-LLM sidecar JSON payloads across Loop 1 and Loop 2.
       </div>
       <div class="tabs">
-        <button class="tab active" onclick="selectNode('p1_remediation')">pk:evidenceAgainst (Loop Trigger)</button>
-        <button class="tab" onclick="selectNode('p1_head')">Pass 1 Nanopub (.trig)</button>
-        <button class="tab" onclick="selectNode('p2_head')">Pass 2 Nanopub (.trig)</button>
-        <button class="tab" onclick="selectNode('p1_assertion')">Pass 1 Sidecar (.json)</button>
-        <button class="tab" onclick="selectNode('p2_sidecar')">Pass 2 Sidecar (.json)</button>
+        <button class="tab active" onclick="selectNode('p1_remediation')">Loop 1: pk:evidenceAgainst</button>
+        <button class="tab" onclick="selectNode('p1_head')">Nanopub #1 (Pass 1 .trig)</button>
+        <button class="tab" onclick="selectNode('p2_head')">Nanopub #2 (Pass 2 .trig)</button>
+        <button class="tab" onclick="selectNode('disc_prereg')">Nanopub #3 (Pre-Reg .trig)</button>
+        <button class="tab" onclick="selectNode('disc_outcome')">Nanopub #4 (Discovery .trig)</button>
+        <button class="tab" onclick="selectNode('disc_sidecar')">Loop 2 Blind Sidecar (.json)</button>
       </div>
       <pre id="code-box"></pre>
     </div>
@@ -714,19 +971,19 @@ def build_interactive_html(out_html: Path):
 <script>
 const PAYLOADS = {{
   p1_remediation: {{
-    title: "pk:evidenceAgainst Triples (Extracted by Gate 3 -> Injected into Prompt 3)",
+    title: "Loop 1 Trigger — pk:evidenceAgainst Triples (Gate 3 -> Prompt 3)",
     desc: "When Pass 1 scores 49.4/100 (< 80), `gates/3_compile_and_query_kg.py` queries `kg/pass1_claim.trig` for `pk:evidenceAgainst` and passes these exact lines into `prompts/03_remediation_prompt.md`:",
     code: `pk:evidenceAgainst
   "remediation needed: Fit the power law y = a * x^b across the full organism (all 12 rows of example/data.csv, accounting for both head and body modules) instead of fitting a linear line only to the 6 head rows (line 49)." ,
   "remediation needed: Report the fitted power-law exponents b_head and b_body and verify that full-dataset R^2 exceeds 0.99." ;`
   }},
   p1_head: {{
-    title: "Pass 1 RDF Nanopublication (kg/pass1_claim.trig — 49.4/100)",
+    title: "Nanopub #1 — Pass 1 RDF Nanopublication (kg/pass1_claim.trig — 49.4/100)",
     desc: "Full TriG file emitted by Gate 3 (`gates/3_compile_and_query_kg.py --pass-num 1`) with 4 named graphs (`Head`, `assertion`, `provenance`, `pubinfo`):",
     code: {json.dumps(p1_trig)}
   }},
   p2_head: {{
-    title: "Pass 2 RDF Nanopublication (kg/pass2_claim.trig — 94.7/100, npx:supersedes Pass 1)",
+    title: "Nanopub #2 — Pass 2 RDF Nanopublication (kg/pass2_claim.trig — 94.7/100, npx:supersedes #1)",
     desc: "Full TriG file emitted after Pass 2 remediation (`gates/3_compile_and_query_kg.py --pass-num 2`), superseding Pass 1:",
     code: {json.dumps(p2_trig)}
   }},
@@ -742,8 +999,23 @@ const PAYLOADS = {{
   }},
   p2_assertion: {{
     title: "Pass 2 Assertion Graph (pkr:claim-example-allometry)",
-    desc: "Converged claim with 0 `pk:evidenceAgainst` items remaining (`pk:hasScore = 0.9470`):",
+    desc: "Converged claim with 0 `pk:evidenceAgainst` items remaining (`pk:hasScore = 0.9471`):",
     code: {json.dumps(p2_trig)}
+  }},
+  disc_prereg: {{
+    title: "Nanopub #3 — Cryptographic Pre-Registration (kg/discovery_preregistration.trig)",
+    desc: "Minted by `discovery/2_preregister_blind_predictions.py` BEFORE `discovery/heldout_blind_species.csv` is ever read, locking the prediction CSV SHA-256 hash into the Knowledge Graph:",
+    code: {json.dumps(prereg_trig)}
+  }},
+  disc_outcome: {{
+    title: "Nanopub #4 — Blind Discovery Outcome (kg/discovery_outcome.trig — +58.7 dB)",
+    desc: "Minted by `gates/7_compile_discovery_kg.py` after Gate 4b verifies the pre-registration SHA-256 lock and scores all 4 hypotheses on held-out species (confirming H1, H2, H3 and falsifying H4 above tau* = 48.6 Myr):",
+    code: {json.dumps(disc_trig)}
+  }},
+  disc_sidecar: {{
+    title: "Gate 4b Zero-LLM Blind Discovery Sidecar (kg/discovery_blind_sidecar.json)",
+    desc: "Deterministic out-of-sample evaluation report with Bayesian Weight of Evidence in decibans (+58.7 dB) and the discovered modularity horizon tau* = 48.6 Myr:",
+    code: {json.dumps(disc_sidecar)}
   }}
 }};
 
@@ -753,7 +1025,7 @@ function selectNode(key) {{
   document.getElementById("node-desc").textContent = item.desc;
   document.getElementById("code-box").textContent = item.code;
 }}
-selectNode("p1_remediation");
+selectNode("disc_outcome");
 </script>
 </body>
 </html>
@@ -765,6 +1037,7 @@ selectNode("p1_remediation");
 
 def main() -> int:
     render_kg_png(OUT_PNG)
+    render_discovery_loop_diagram(OUT_DISC_PNG, OUT_DISC_GIF)
     build_interactive_html(OUT_HTML)
     return 0
 

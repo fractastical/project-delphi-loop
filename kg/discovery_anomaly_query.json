@@ -1,0 +1,19 @@
+{
+  "source_kg_head": "https://w3id.org/delphi/np/pass2-example-claim",
+  "supersedes_kg_node": "https://w3id.org/delphi/np/pass1-example-claim",
+  "pass1_r2": -0.246106,
+  "pass2_r2": 1.0,
+  "pass1_score": 49.4,
+  "pass2_score": 94.7,
+  "discovered_exponent_gap": {
+    "b_head": 1.9932,
+    "b_body": 3.0007,
+    "delta_b": 1.0075
+  },
+  "verified_lean_theorems": [
+    "ProjectDelphi.Discovery.nine_of_seventeen_head_bias_amplifies_posterior_error",
+    "ProjectDelphi.Discovery.non_affine_warp_eliminates_box_stretch_residual",
+    "ProjectDelphi.Discovery.module_decoupling_grows_with_divergence_time"
+  ],
+  "discovery_question": "Why does fitting head-heavy landmarks (9/17 = 52.9% in the head, b_head=2.0) actively degrade whole-body outlines (b_body=3.0) across families, and at what evolutionary divergence horizon tau* do the head and body modules decouple?"
+}

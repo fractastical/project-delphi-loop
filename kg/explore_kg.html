@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Project Delphi — Interactive RDF Knowledge Graph & Nanopub Explorer</title>
+<title>Project Delphi — Interactive RDF Knowledge Graph & Discovery Explorer</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -56,14 +56,6 @@
     color: #e6edf3;
     margin: 8px 0 0 0;
   }
-  .badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: monospace;
-  }
   .tabs { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
   .tab {
     background: var(--elev);
@@ -78,15 +70,15 @@
 </style>
 </head>
 <body>
-  <h1>Project Delphi — Interactive RDF Knowledge Graph & Nanopub Explorer</h1>
+  <h1>Project Delphi — Interactive RDF Knowledge Graph & Discovery Explorer</h1>
   <div class="subtitle">
-    Click any RDF node in the graph below to inspect its exact triples, cryptographic SHA-256 locks, and how
-    <code>pk:evidenceAgainst</code> drives the closed remediation loop from Pass 1 (49.4/100) to Pass 2 (94.7/100).
+    Click any RDF Nanopublication node across <b>Loop 1 (Making the Knowledge Graph)</b> and
+    <b>Loop 2 (Scientific Discovery &amp; Blind Pre-Registration)</b> to inspect its exact <code>.trig</code> triples and sidecar JSON payloads.
   </div>
 
   <div class="layout">
     <div class="panel">
-      <svg viewBox="0 0 820 500" width="100%" style="background:#090d13;border-radius:8px;border:1px solid #30363d;">
+      <svg viewBox="0 0 820 620" width="100%" style="background:#090d13;border-radius:8px;border:1px solid #30363d;">
         <defs>
           <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#3fb950"/>
@@ -97,71 +89,104 @@
           <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
           </marker>
+          <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#d29922"/>
+          </marker>
         </defs>
 
-        <!-- Edges -->
-        <path d="M 520 75 Q 395 25 270 75" fill="none" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrow-green)"/>
-        <text x="395" y="38" fill="#3fb950" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">npx:supersedes</text>
+        <!-- Loop 1 Header -->
+        <text x="25" y="26" fill="#58a6ff" font-size="12" font-family="monospace" font-weight="bold">LOOP 1: MAKING &amp; REMEDIATING THE KNOWLEDGE GRAPH (`python3 run_loop.py`)</text>
 
-        <line x1="155" y1="115" x2="155" y2="180" stroke="#d29922" stroke-width="2" marker-end="url(#arrow-blue)"/>
-        <text x="155" y="152" fill="#8b949e" font-size="10" font-family="monospace" text-anchor="middle">np:hasAssertion</text>
+        <!-- Edges Loop 1 -->
+        <path d="M 520 75 Q 395 30 270 75" fill="none" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+        <text x="395" y="42" fill="#3fb950" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">npx:supersedes</text>
 
-        <line x1="155" y1="265" x2="155" y2="345" stroke="#f85149" stroke-width="2.2" marker-end="url(#arrow-red)"/>
-        <text x="155" y="310" fill="#f85149" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">pk:evidenceAgainst (2)</text>
+        <line x1="155" y1="115" x2="155" y2="170" stroke="#d29922" stroke-width="2" marker-end="url(#arrow-blue)"/>
+        <line x1="155" y1="255" x2="155" y2="315" stroke="#f85149" stroke-width="2.2" marker-end="url(#arrow-red)"/>
+        <text x="155" y="290" fill="#f85149" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">pk:evidenceAgainst (2)</text>
 
-        <path d="M 290 385 Q 410 385 520 235" fill="none" stroke="#f85149" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#arrow-red)"/>
-        <text x="415" y="340" fill="#f85149" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">Prompt 3 resolves</text>
+        <path d="M 290 355 Q 410 355 520 215" fill="none" stroke="#f85149" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#arrow-red)"/>
+        <text x="415" y="315" fill="#f85149" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">Prompt 3 resolves</text>
 
-        <line x1="645" y1="115" x2="645" y2="180" stroke="#3fb950" stroke-width="2" marker-end="url(#arrow-green)"/>
-        <text x="645" y="152" fill="#8b949e" font-size="10" font-family="monospace" text-anchor="middle">np:hasAssertion</text>
-
-        <line x1="645" y1="265" x2="645" y2="345" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)"/>
-        <text x="645" y="310" fill="#58a6ff" font-size="10" font-family="monospace" text-anchor="middle">prov:wasDerivedFrom</text>
+        <line x1="645" y1="115" x2="645" y2="170" stroke="#3fb950" stroke-width="2" marker-end="url(#arrow-green)"/>
+        <line x1="645" y1="255" x2="645" y2="315" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)"/>
 
         <!-- Node 1: Pass 1 Head -->
         <g class="node-btn" onclick="selectNode('p1_head')">
           <rect x="40" y="45" width="230" height="70" rx="8" fill="#161b22" stroke="#d29922" stroke-width="2"/>
-          <text x="155" y="70" fill="#d29922" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">np:Nanopublication (Pass 1)</text>
+          <text x="155" y="70" fill="#d29922" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Nanopub #1 (Pass 1)</text>
           <text x="155" y="92" fill="#f0f6fc" font-size="11" font-family="monospace" text-anchor="middle">delphi:np/pass1-example-claim</text>
         </g>
 
         <!-- Node 2: Pass 1 Assertion -->
         <g class="node-btn" onclick="selectNode('p1_assertion')">
-          <rect x="40" y="180" width="230" height="85" rx="8" fill="#161b22" stroke="#d29922" stroke-width="2"/>
-          <text x="155" y="205" fill="#f0f6fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:Claim (Pass 1 v1)</text>
-          <text x="155" y="226" fill="#f85149" font-size="11" font-family="monospace" text-anchor="middle">pk:hasScore "0.4940" (49.4/100)</text>
-          <text x="155" y="246" fill="#8b949e" font-size="11" font-family="monospace" text-anchor="middle">R² = -0.2461 | RMSE = 44.23g</text>
+          <rect x="40" y="170" width="230" height="85" rx="8" fill="#161b22" stroke="#d29922" stroke-width="2"/>
+          <text x="155" y="195" fill="#f0f6fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:Claim (Pass 1 v1)</text>
+          <text x="155" y="216" fill="#f85149" font-size="11" font-family="monospace" text-anchor="middle">pk:hasScore "0.4940" (49.4/100)</text>
+          <text x="155" y="236" fill="#8b949e" font-size="11" font-family="monospace" text-anchor="middle">R² = -0.2461 | RMSE = 44.23g</text>
         </g>
 
         <!-- Node 3: Pass 1 evidenceAgainst -->
         <g class="node-btn" onclick="selectNode('p1_remediation')">
-          <rect x="25" y="345" width="265" height="90" rx="8" fill="#2a1215" stroke="#f85149" stroke-width="2.2"/>
-          <text x="157" y="370" fill="#f85149" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:evidenceAgainst (Trigger)</text>
-          <text x="157" y="392" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">1. Fit power law y=a*x^b on all 12 rows</text>
-          <text x="157" y="412" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">2. Report b_head &amp; b_body (R² &gt; 0.99)</text>
+          <rect x="25" y="315" width="265" height="80" rx="8" fill="#2a1215" stroke="#f85149" stroke-width="2.2"/>
+          <text x="157" y="340" fill="#f85149" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:evidenceAgainst (Trigger)</text>
+          <text x="157" y="362" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">1. Fit power law y=a*x^b on all 12 rows</text>
+          <text x="157" y="380" fill="#f0f6fc" font-size="10.5" font-family="monospace" text-anchor="middle">2. Report b_head &amp; b_body (R² &gt; 0.99)</text>
         </g>
 
         <!-- Node 4: Pass 2 Head -->
         <g class="node-btn" onclick="selectNode('p2_head')">
           <rect x="520" y="45" width="250" height="70" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="2.2"/>
-          <text x="645" y="70" fill="#3fb950" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">np:Nanopublication (Pass 2 Head)</text>
+          <text x="645" y="70" fill="#3fb950" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Nanopub #2 (Pass 2 Head)</text>
           <text x="645" y="92" fill="#f0f6fc" font-size="11" font-family="monospace" text-anchor="middle">delphi:np/pass2-example-claim</text>
         </g>
 
         <!-- Node 5: Pass 2 Assertion -->
         <g class="node-btn" onclick="selectNode('p2_assertion')">
-          <rect x="520" y="180" width="250" height="85" rx="8" fill="#12261e" stroke="#3fb950" stroke-width="2.2"/>
-          <text x="645" y="205" fill="#f0f6fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:Claim (Pass 2 Remediated)</text>
-          <text x="645" y="226" fill="#3fb950" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">pk:hasScore "0.9470" (94.7/100)</text>
-          <text x="645" y="246" fill="#c9d1d9" font-size="11" font-family="monospace" text-anchor="middle">R² = 1.0000 | RMSE = 0.0227g</text>
+          <rect x="520" y="170" width="250" height="85" rx="8" fill="#12261e" stroke="#3fb950" stroke-width="2.2"/>
+          <text x="645" y="195" fill="#f0f6fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">pk:Claim (Pass 2 Remediated)</text>
+          <text x="645" y="216" fill="#3fb950" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">pk:hasScore "0.9471" (94.7/100)</text>
+          <text x="645" y="236" fill="#c9d1d9" font-size="11" font-family="monospace" text-anchor="middle">R² = 1.0000 | RMSE = 0.0227g</text>
         </g>
 
-        <!-- Node 6: Pass 2 Sidecar & Provenance -->
+        <!-- Node 6: Pass 2 Sidecar -->
         <g class="node-btn" onclick="selectNode('p2_sidecar')">
-          <rect x="520" y="345" width="250" height="90" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
-          <text x="645" y="370" fill="#58a6ff" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">sub:provenance &amp; Sidecar Gate 2</text>
-          <text x="645" y="392" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">SHA-256: ddb638b2e99b...</text>
-          <text x="645" y="412" fill="#3fb950" font-size="10.5" font-family="monospace" text-anchor="middle">0 pk:evidenceAgainst remaining</text>
+          <rect x="520" y="315" width="250" height="80" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+          <text x="645" y="340" fill="#58a6ff" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Gate 2 Sidecar &amp; Anomaly Seed</text>
+          <text x="645" y="362" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">b_head = 2.00 vs b_body = 3.00</text>
+          <text x="645" y="380" fill="#bc8cff" font-size="10.5" font-family="monospace" text-anchor="middle">Seeds Loop 2 Discovery Query!</text>
+        </g>
+
+        <!-- Divider -->
+        <line x1="20" y1="420" x2="800" y2="420" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="25" y="445" fill="#bc8cff" font-size="12" font-family="monospace" font-weight="bold">LOOP 2: SCIENTIFIC DISCOVERY &amp; BLIND PRE-REGISTRATION (`python3 run_discovery_loop.py`)</text>
+
+        <!-- Edge from Pass 2 to Nanopub #3 -->
+        <path d="M 520 385 Q 340 435 200 470" fill="none" stroke="#d29922" stroke-width="2.2" marker-end="url(#arrow-amber)"/>
+        <text x="360" y="460" fill="#d29922" font-size="10.5" font-family="monospace" font-weight="bold" text-anchor="middle">prov:wasDerivedFrom + SHA-256 Lock</text>
+
+        <!-- Node 7: Nanopub #3 Pre-Registration -->
+        <g class="node-btn" onclick="selectNode('disc_prereg')">
+          <rect x="25" y="470" width="330" height="125" rx="8" fill="#1f1a10" stroke="#d29922" stroke-width="2.2"/>
+          <text x="190" y="495" fill="#d29922" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Nanopub #3: pk:PreRegisteredPrediction</text>
+          <text x="190" y="516" fill="#f0f6fc" font-size="11" font-family="monospace" text-anchor="middle">delphi:np/discovery-preregistration</text>
+          <text x="190" y="538" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">SHA-256: fd123b73f8058320... (Locked BEFORE unblinding)</text>
+          <text x="190" y="558" fill="#3fb950" font-size="10.5" font-family="monospace" text-anchor="middle">Registers H1, H2, H3, H4 + tau* = 48.8 Myr</text>
+          <text x="190" y="578" fill="#58a6ff" font-size="10.5" font-family="monospace" text-anchor="middle">Lean 4: discovery/discovery_law.lean (0 sorry)</text>
+        </g>
+
+        <!-- Edge from Nanopub #3 to Nanopub #4 -->
+        <line x1="355" y1="532" x2="465" y2="532" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+        <text x="410" y="518" fill="#3fb950" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">Gate 4b Unblinds</text>
+
+        <!-- Node 8: Nanopub #4 Discovery Outcome -->
+        <g class="node-btn" onclick="selectNode('disc_outcome')">
+          <rect x="465" y="470" width="330" height="125" rx="8" fill="#12261e" stroke="#3fb950" stroke-width="2.2"/>
+          <text x="630" y="495" fill="#3fb950" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">Nanopub #4: pk:DiscoveryClaim (+58.7 dB)</text>
+          <text x="630" y="516" fill="#f0f6fc" font-size="11" font-family="monospace" text-anchor="middle">delphi:np/discovery-outcome-claim</text>
+          <text x="630" y="538" fill="#3fb950" font-size="10.5" font-family="monospace" text-anchor="middle">CONFIRMED: H1 (8/8), H2 (r=0.979), H3 (4.75x Jaw)</text>
+          <text x="630" y="558" fill="#f85149" font-size="10.5" font-family="monospace" text-anchor="middle">FALSIFIED: H4 &gt; 50 Myr (Horizon tau* = 48.6 Myr)</text>
+          <text x="630" y="578" fill="#c9d1d9" font-size="10.5" font-family="monospace" text-anchor="middle">npx:evaluatesPreRegistration -&gt; Nanopub #3</text>
         </g>
       </svg>
     </div>
@@ -171,14 +196,15 @@
         Click any node in the RDF graph to inspect its contents
       </div>
       <div id="node-desc" style="font-size:13px;color:var(--muted);margin-top:6px;">
-        Showing exact RDF TriG (`kg/pass1_claim.trig` & `kg/pass2_claim.trig`) and Gate 2 sidecar JSON payloads.
+        Inspect exact RDF TriG and zero-LLM sidecar JSON payloads across Loop 1 and Loop 2.
       </div>
       <div class="tabs">
-        <button class="tab active" onclick="selectNode('p1_remediation')">pk:evidenceAgainst (Loop Trigger)</button>
-        <button class="tab" onclick="selectNode('p1_head')">Pass 1 Nanopub (.trig)</button>
-        <button class="tab" onclick="selectNode('p2_head')">Pass 2 Nanopub (.trig)</button>
-        <button class="tab" onclick="selectNode('p1_assertion')">Pass 1 Sidecar (.json)</button>
-        <button class="tab" onclick="selectNode('p2_sidecar')">Pass 2 Sidecar (.json)</button>
+        <button class="tab active" onclick="selectNode('p1_remediation')">Loop 1: pk:evidenceAgainst</button>
+        <button class="tab" onclick="selectNode('p1_head')">Nanopub #1 (Pass 1 .trig)</button>
+        <button class="tab" onclick="selectNode('p2_head')">Nanopub #2 (Pass 2 .trig)</button>
+        <button class="tab" onclick="selectNode('disc_prereg')">Nanopub #3 (Pre-Reg .trig)</button>
+        <button class="tab" onclick="selectNode('disc_outcome')">Nanopub #4 (Discovery .trig)</button>
+        <button class="tab" onclick="selectNode('disc_sidecar')">Loop 2 Blind Sidecar (.json)</button>
       </div>
       <pre id="code-box"></pre>
     </div>
@@ -187,19 +213,19 @@
 <script>
 const PAYLOADS = {
   p1_remediation: {
-    title: "pk:evidenceAgainst Triples (Extracted by Gate 3 -> Injected into Prompt 3)",
+    title: "Loop 1 Trigger — pk:evidenceAgainst Triples (Gate 3 -> Prompt 3)",
     desc: "When Pass 1 scores 49.4/100 (< 80), `gates/3_compile_and_query_kg.py` queries `kg/pass1_claim.trig` for `pk:evidenceAgainst` and passes these exact lines into `prompts/03_remediation_prompt.md`:",
     code: `pk:evidenceAgainst
   "remediation needed: Fit the power law y = a * x^b across the full organism (all 12 rows of example/data.csv, accounting for both head and body modules) instead of fitting a linear line only to the 6 head rows (line 49)." ,
   "remediation needed: Report the fitted power-law exponents b_head and b_body and verify that full-dataset R^2 exceeds 0.99." ;`
   },
   p1_head: {
-    title: "Pass 1 RDF Nanopublication (kg/pass1_claim.trig — 49.4/100)",
+    title: "Nanopub #1 — Pass 1 RDF Nanopublication (kg/pass1_claim.trig — 49.4/100)",
     desc: "Full TriG file emitted by Gate 3 (`gates/3_compile_and_query_kg.py --pass-num 1`) with 4 named graphs (`Head`, `assertion`, `provenance`, `pubinfo`):",
     code: "@prefix np: <http://www.nanopub.org/nschema#> .\n@prefix npx: <http://purl.org/nanopub/x/> .\n@prefix prov: <http://www.w3.org/ns/prov#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@prefix pk: <https://w3id.org/delphi/ontology/> .\n@prefix pkr: <https://w3id.org/delphi/resource/> .\n@prefix sub: <https://w3id.org/delphi/np/pass1-example-claim/> .\n\nsub:Head {\n  <https://w3id.org/delphi/np/pass1-example-claim> a np:Nanopublication ;\n    np:hasAssertion sub:assertion ;\n    np:hasProvenance sub:provenance ;\n    np:hasPublicationInfo sub:pubinfo .\n}\n\nsub:assertion {\n  pkr:claim-example-allometry a pk:Claim ;\n    pk:targetScript \"example/pass1_naive_fit.py\" ;\n    pk:artifactSha256 \"26455f9f9c24c80bde0d7d8dceabd2a759ece2c070624b42ecb340744b866362\" ;\n    pk:measuredR2 \"-0.246106\"^^xsd:double ;\n    pk:measuredRMSE \"44.2323\"^^xsd:double ;\n    pk:assessedBy pkr:model-gemini-4-argon ;\n    pk:hasScore \"0.4940\"^^xsd:double ;\n  pk:evidenceAgainst\n    \"remediation needed: Fit the power law y = a * x^b across the full organism (all 12 rows of example/data.csv, accounting for both head and body modules) instead of fitting a linear line only to the 6 head rows (line 49).\",\n    \"remediation needed: Report the fitted power-law exponents b_head and b_body and verify that full-dataset R^2 exceeds 0.99.\" ;\n    pk:verdict \"needs_remediation\" .\n}\n\nsub:provenance {\n  sub:assertion prov:wasAttributedTo pkr:model-gemini-4-argon ;\n    prov:wasDerivedFrom <file://example/pass1_metrics.json> .\n}\n\nsub:pubinfo {\n  <https://w3id.org/delphi/np/pass1-example-claim> npx:hasTrustyDigest \"abd439829327262020a1bf096f155cdf\" .\n}\n"
   },
   p2_head: {
-    title: "Pass 2 RDF Nanopublication (kg/pass2_claim.trig — 94.7/100, npx:supersedes Pass 1)",
+    title: "Nanopub #2 — Pass 2 RDF Nanopublication (kg/pass2_claim.trig — 94.7/100, npx:supersedes #1)",
     desc: "Full TriG file emitted after Pass 2 remediation (`gates/3_compile_and_query_kg.py --pass-num 2`), superseding Pass 1:",
     code: "@prefix np: <http://www.nanopub.org/nschema#> .\n@prefix npx: <http://purl.org/nanopub/x/> .\n@prefix prov: <http://www.w3.org/ns/prov#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@prefix pk: <https://w3id.org/delphi/ontology/> .\n@prefix pkr: <https://w3id.org/delphi/resource/> .\n@prefix sub: <https://w3id.org/delphi/np/pass2-example-claim/> .\n\nsub:Head {\n  <https://w3id.org/delphi/np/pass2-example-claim> a np:Nanopublication ;\n    np:hasAssertion sub:assertion ;\n    np:hasProvenance sub:provenance ;\n    np:hasPublicationInfo sub:pubinfo .\n}\n\nsub:assertion {\n  pkr:claim-example-allometry a pk:Claim ;\n    pk:targetScript \"example/pass2_remediated_fit.py\" ;\n    pk:artifactSha256 \"ddb638b2e99b344a39355587d19878114f16e7ddfe5656c2a999bab84134ffa1\" ;\n    pk:measuredR2 \"1.0\"^^xsd:double ;\n    pk:measuredRMSE \"0.0227\"^^xsd:double ;\n    pk:assessedBy pkr:model-gemini-4-argon ;\n    pk:hasScore \"0.9471\"^^xsd:double ;\n    pk:verdict \"faithful\" .\n}\n\nsub:provenance {\n  sub:assertion prov:wasAttributedTo pkr:model-gemini-4-argon ;\n    prov:wasDerivedFrom <file://example/pass2_metrics.json> .\n}\n\nsub:pubinfo {\n  npx:supersedes <https://w3id.org/delphi/np/pass1-example-claim> ;\n  <https://w3id.org/delphi/np/pass2-example-claim> npx:hasTrustyDigest \"6bae1985e4ea60576d5acc437d7eb612\" .\n}\n"
   },
@@ -215,8 +241,23 @@ const PAYLOADS = {
   },
   p2_assertion: {
     title: "Pass 2 Assertion Graph (pkr:claim-example-allometry)",
-    desc: "Converged claim with 0 `pk:evidenceAgainst` items remaining (`pk:hasScore = 0.9470`):",
+    desc: "Converged claim with 0 `pk:evidenceAgainst` items remaining (`pk:hasScore = 0.9471`):",
     code: "@prefix np: <http://www.nanopub.org/nschema#> .\n@prefix npx: <http://purl.org/nanopub/x/> .\n@prefix prov: <http://www.w3.org/ns/prov#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@prefix pk: <https://w3id.org/delphi/ontology/> .\n@prefix pkr: <https://w3id.org/delphi/resource/> .\n@prefix sub: <https://w3id.org/delphi/np/pass2-example-claim/> .\n\nsub:Head {\n  <https://w3id.org/delphi/np/pass2-example-claim> a np:Nanopublication ;\n    np:hasAssertion sub:assertion ;\n    np:hasProvenance sub:provenance ;\n    np:hasPublicationInfo sub:pubinfo .\n}\n\nsub:assertion {\n  pkr:claim-example-allometry a pk:Claim ;\n    pk:targetScript \"example/pass2_remediated_fit.py\" ;\n    pk:artifactSha256 \"ddb638b2e99b344a39355587d19878114f16e7ddfe5656c2a999bab84134ffa1\" ;\n    pk:measuredR2 \"1.0\"^^xsd:double ;\n    pk:measuredRMSE \"0.0227\"^^xsd:double ;\n    pk:assessedBy pkr:model-gemini-4-argon ;\n    pk:hasScore \"0.9471\"^^xsd:double ;\n    pk:verdict \"faithful\" .\n}\n\nsub:provenance {\n  sub:assertion prov:wasAttributedTo pkr:model-gemini-4-argon ;\n    prov:wasDerivedFrom <file://example/pass2_metrics.json> .\n}\n\nsub:pubinfo {\n  npx:supersedes <https://w3id.org/delphi/np/pass1-example-claim> ;\n  <https://w3id.org/delphi/np/pass2-example-claim> npx:hasTrustyDigest \"6bae1985e4ea60576d5acc437d7eb612\" .\n}\n"
+  },
+  disc_prereg: {
+    title: "Nanopub #3 — Cryptographic Pre-Registration (kg/discovery_preregistration.trig)",
+    desc: "Minted by `discovery/2_preregister_blind_predictions.py` BEFORE `discovery/heldout_blind_species.csv` is ever read, locking the prediction CSV SHA-256 hash into the Knowledge Graph:",
+    code: "@prefix np: <http://www.nanopub.org/nschema#> .\n@prefix npx: <http://purl.org/nanopub/x/> .\n@prefix prov: <http://www.w3.org/ns/prov#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@prefix pk: <https://w3id.org/delphi/ontology/> .\n@prefix pkr: <https://w3id.org/delphi/resource/> .\n@prefix sub: <https://w3id.org/delphi/np/discovery-preregistration/> .\n\nsub:Head {\n  <https://w3id.org/delphi/np/discovery-preregistration> a np:Nanopublication ;\n    np:hasAssertion sub:assertion ;\n    np:hasProvenance sub:provenance ;\n    np:hasPublicationInfo sub:pubinfo .\n}\n\nsub:assertion {\n  pkr:prereg-modular-allometry-horizon a pk:PreRegisteredPrediction ;\n    pk:lockedPredictionsFile \"discovery/blind_predictions_locked.csv\" ;\n    pk:lockedPredictionsSha256 \"fd123b73f80583205a8f2c5c5e91c1239ad67996746fb27e5e64ccdeb5eb2215\" ;\n    pk:predictedHorizonMyr \"48.75\"^^xsd:double ;\n    pk:registersHypothesis \"H1_head_bias_seesaw\", \"H2_horizon_error_scaling\", \"H3_sympatric_head_acceleration\", \"H4_unbounded_17dot_null\" ;\n    pk:blindedStatus \"locked_prior_to_heldout_access\" .\n}\n\nsub:provenance {\n  sub:assertion prov:wasAttributedTo pkr:model-claude-fable-5-1 ;\n    prov:wasDerivedFrom <https://w3id.org/delphi/np/pass2-example-claim> ;\n    prov:wasDerivedFrom <file://discovery/ablation_and_hypotheses.json> .\n}\n\nsub:pubinfo {\n  <https://w3id.org/delphi/np/discovery-preregistration> npx:hasTrustyDigest \"fd123b73f80583205a8f2c5c5e91c123\" .\n}\n"
+  },
+  disc_outcome: {
+    title: "Nanopub #4 — Blind Discovery Outcome (kg/discovery_outcome.trig — +58.7 dB)",
+    desc: "Minted by `gates/7_compile_discovery_kg.py` after Gate 4b verifies the pre-registration SHA-256 lock and scores all 4 hypotheses on held-out species (confirming H1, H2, H3 and falsifying H4 above tau* = 48.6 Myr):",
+    code: "@prefix np: <http://www.nanopub.org/nschema#> .\n@prefix npx: <http://purl.org/nanopub/x/> .\n@prefix prov: <http://www.w3.org/ns/prov#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@prefix pk: <https://w3id.org/delphi/ontology/> .\n@prefix pkr: <https://w3id.org/delphi/resource/> .\n@prefix sub: <https://w3id.org/delphi/np/discovery-outcome-claim/> .\n\nsub:Head {\n  <https://w3id.org/delphi/np/discovery-outcome-claim> a np:Nanopublication ;\n    np:hasAssertion sub:assertion ;\n    np:hasProvenance sub:provenance ;\n    np:hasPublicationInfo sub:pubinfo .\n}\n\nsub:assertion {\n  pkr:discovery-two-rule-morphospace-synthesis a pk:DiscoveryClaim ;\n    pk:confirmedHypothesis\n      \"H1: 9/17 head-landmark density bias degrades interfamily outlines (IoU 0.614 -> 0.562), whereas 600-pt direct outline fitting recovers 100% of pairs (mean IoU 0.760)\" ,\n      \"H2: Out-of-sample morphometric error scales linearly with phylogenetic divergence time tau (r = 0.9788, 95% PI coverage = 87.5%)\" ,\n      \"H3: Sympatric sister species accelerate craniofacial/jaw divergence 4.754x over body divergence\" ;\n    pk:falsifiedHypothesis\n      \"H4: Single 17-landmark global grid invariance above 50 Myr is FALSIFIED (drops from 100% below 50 Myr to 0.0% above 50 Myr)\" ;\n    pk:discoveredRegimeBoundary \"tau_star = 48.6 Myr (craniofacial vs. axial fin modularity horizon)\" ;\n    pk:verifiedByLeanTheorem \"ProjectDelphi.Discovery.nine_of_seventeen_head_bias_amplifies_posterior_error\" ;\n    pk:weightOfEvidenceDecibans \"58.68\"^^xsd:double ;\n    pk:verdict \"verified_discovery_with_domain_boundary\" .\n}\n\nsub:provenance {\n  sub:assertion prov:wasAttributedTo pkr:model-gemini-4-argon , pkr:model-claude-fable-5-1 ;\n    npx:evaluatesPreRegistration <https://w3id.org/delphi/np/discovery-preregistration> ;\n    prov:wasDerivedFrom <https://w3id.org/delphi/np/pass2-example-claim> ;\n    prov:wasDerivedFrom <file://kg/discovery_blind_sidecar.json> .\n}\n\nsub:pubinfo {\n  <https://w3id.org/delphi/np/discovery-outcome-claim> npx:hasTrustyDigest \"e2c56a0f7a02bbd3d1f9927226d6dbf3\" .\n}\n"
+  },
+  disc_sidecar: {
+    title: "Gate 4b Zero-LLM Blind Discovery Sidecar (kg/discovery_blind_sidecar.json)",
+    desc: "Deterministic out-of-sample evaluation report with Bayesian Weight of Evidence in decibans (+58.7 dB) and the discovered modularity horizon tau* = 48.6 Myr:",
+    code: "{\n  \"preregistration_nanopub\": \"https://w3id.org/delphi/np/discovery-preregistration\",\n  \"locked_predictions_sha256\": \"fd123b73f80583205a8f2c5c5e91c1239ad67996746fb27e5e64ccdeb5eb2215\",\n  \"heldout_dataset_sha256\": \"3875abba0077cc8db7929184d300bafb9d6434ee1cfb2cd81ab2f3c64e6700d7\",\n  \"n_heldout_pairs\": 16,\n  \"hypothesis_outcomes\": {\n    \"H1_head_bias_seesaw_and_outline_recovery\": {\n      \"status\": \"CONFIRMED\",\n      \"interfamily_recovery_rate\": 1.0,\n      \"weight_of_evidence_db\": 24.08\n    },\n    \"H2_horizon_calibrated_error_scaling\": {\n      \"status\": \"CONFIRMED\",\n      \"pearson_r_error_vs_tau\": 0.9788,\n      \"pi95_empirical_coverage\": 0.875,\n      \"weight_of_evidence_db\": 18.4\n    },\n    \"H3_sympatric_craniofacial_acceleration\": {\n      \"status\": \"CONFIRMED\",\n      \"sympatric_head_body_ratio\": 4.754,\n      \"allopatric_head_body_ratio\": 1.353,\n      \"weight_of_evidence_db\": 16.2\n    },\n    \"H4_unbounded_17dot_single_grid_null\": {\n      \"status\": \"FALSIFIED\",\n      \"within_genus_floor_rate_below_50myr\": 1.0,\n      \"within_genus_floor_rate_above_50myr\": 0.0,\n      \"discovered_modularity_horizon_tau_star_myr\": 48.6,\n      \"scientific_meaning\": \"Single 17-landmark global grids hold below ~48.6 Myr (100%) but drop to 0.0% above 50 Myr as craniofacial and fin modules decouple.\"\n    }\n  },\n  \"combined_weight_of_evidence_db\": 58.68\n}\n"
   }
 };
 
@@ -226,7 +267,7 @@ function selectNode(key) {
   document.getElementById("node-desc").textContent = item.desc;
   document.getElementById("code-box").textContent = item.code;
 }
-selectNode("p1_remediation");
+selectNode("disc_outcome");
 </script>
 </body>
 </html>

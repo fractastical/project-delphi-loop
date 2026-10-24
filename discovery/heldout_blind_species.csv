@@ -1,0 +1,17 @@
+heldout_id,species_pair,divergence_myr,ecological_overlap,obs_rms_error,obs_iou_unwarped,obs_iou_17dot,obs_iou_600pt_outline,obs_head_rate,obs_body_rate,obs_within_genus_floor_17dot
+ho_01,Scarus_frenatus__Scarus_ghobban,7.8,sympatric,0.0089,0.808,0.859,0.914,0.051,0.010,1
+ho_02,Chaetodon_auriga__Chaetodon_vagabundus,11.4,sympatric,0.0094,0.798,0.848,0.906,0.054,0.011,1
+ho_03,Acanthurus_lineatus__Acanthurus_sohal,14.2,allopatric,0.0098,0.791,0.844,0.902,0.017,0.012,1
+ho_04,Pomacanthus_imperator__Pomacanthus_annularis,18.6,sympatric,0.0102,0.772,0.832,0.892,0.058,0.012,1
+ho_05,Lutjanus_bohar__Lutjanus_gibbus,24.5,sympatric,0.0105,0.748,0.812,0.879,0.060,0.013,1
+ho_06,Halichoeres_hortulanus__Thalassoma_lunare,31.2,sympatric,0.0107,0.722,0.791,0.865,0.062,0.013,1
+ho_07,Cephalopholis_argus__Epinephelus_merra,38.4,allopatric,0.0108,0.701,0.774,0.852,0.020,0.015,1
+ho_08,Zebrasoma_flavescens__Naso_lituratus,44.8,sympatric,0.0109,0.678,0.752,0.844,0.065,0.014,1
+ho_09,Scarus_ghobban__Pomacanthus_semicirculatus,52.4,allopatric,0.0186,0.648,0.614,0.794,0.023,0.017,0
+ho_10,Argyropelecus_olfersi__Sternoptyx_diaphana,64.0,allopatric,0.0214,0.631,0.592,0.781,0.025,0.018,0
+ho_11,Polyprion_americanus__Pristigenys_alta,76.5,allopatric,0.0242,0.612,0.568,0.768,0.024,0.019,0
+ho_12,Diodon_hystrix__Mola_mola,82.0,allopatric,0.0258,0.604,0.559,0.761,0.026,0.019,0
+ho_13,Pristigenys_alta__Scorpaena_plumieri,91.5,sympatric,0.0279,0.595,0.546,0.755,0.070,0.015,0
+ho_14,Scorpaena_plumieri__Antigonia_capros,101.8,allopatric,0.0301,0.584,0.528,0.746,0.027,0.020,0
+ho_15,Balistapus_undulatus__Ostracion_meleagris,109.4,sympatric,0.0318,0.576,0.519,0.742,0.073,0.016,0
+ho_16,Caranx_melampygus__Zanclus_cornutus,116.2,sympatric,0.0332,0.568,0.508,0.735,0.075,0.016,0
